@@ -1,29 +1,10 @@
-#include <Rinternals.h>
-#include <bson.h>
-#include <mongoc.h>
-#include <utils.h>
+#include <mongolite.h>
 
-SEXP R_mongo_collection_new(SEXP uri_string, SEXP db, SEXP collection) {
-  mongoc_client_t *client;
-  mongoc_collection_t *col;
-
-  client = mongoc_client_new (translateCharUTF8(asChar(uri_string)));
-  if(!client)
-    error("Invalid uri_string. Try mongodb://localhost");
-
-  //set ssl certificates here
-  mongoc_client_set_ssl_opts(client, mongoc_ssl_opt_get_default());
-
-  //verify that server is online
-  bson_error_t err;
-  if(!mongoc_client_get_server_status(client, NULL, NULL, &err)){
-    mongoc_client_destroy(client);
-    error(err.message);
-  }
-
-  col = mongoc_client_get_collection (client, translateCharUTF8(asChar(db)), translateCharUTF8(asChar(collection)));
+SEXP R_mongo_collection_new(SEXP ptr_client, SEXP collection, SEXP db) {
+  mongoc_client_t *client = r2client(ptr_client);
+  mongoc_collection_t *col = mongoc_client_get_collection (client, translateCharUTF8(asChar(db)), translateCharUTF8(asChar(collection)));
   SEXP out = PROTECT(col2r(col));
-  setAttrib(out, install("client"), client2r(client));
+  setAttrib(out, install("client"), ptr_client);
   UNPROTECT(1);
   return out;
 }
@@ -33,7 +14,7 @@ SEXP R_mongo_collection_drop (SEXP ptr){
   bson_error_t err;
 
   if(!mongoc_collection_drop(col, &err))
-    error(err.message);
+    stop(err.message);
 
   return ScalarLogical(1);
 }
@@ -51,7 +32,7 @@ SEXP R_mongo_collection_count (SEXP ptr, SEXP ptr_query){
   bson_error_t err;
   int64_t count = mongoc_collection_count (col, MONGOC_QUERY_NONE, query, 0, 0, NULL, &err);
   if (count < 0)
-    error(err.message);
+    stop(err.message);
 
   //R does not support int64
   return ScalarReal((double) count);
@@ -64,7 +45,7 @@ SEXP R_mongo_collection_insert_bson(SEXP ptr_col, SEXP ptr_bson, SEXP stop_on_er
   bson_error_t err;
 
   if(!mongoc_collection_insert(col, flags, b, NULL, &err))
-    error(err.message);
+    stop(err.message);
 
   return ScalarLogical(1);
 }
@@ -83,14 +64,14 @@ SEXP R_mongo_collection_update(SEXP ptr_col, SEXP ptr_selector, SEXP ptr_update,
 
   bson_error_t err;
   if(!mongoc_collection_update(col, flags, selector, update, NULL, &err))
-    error(err.message);
+    stop(err.message);
 
   return ScalarLogical(1);
 }
 
 SEXP R_mongo_collection_insert_page(SEXP ptr_col, SEXP json_vec, SEXP stop_on_error){
   if(!isString(json_vec) || !length(json_vec))
-    error("json_vec must be character string of at least length 1");
+    stop("json_vec must be character string of at least length 1");
 
   //ordered means serial execution
   bool ordered = asLogical(stop_on_error);
@@ -104,7 +85,7 @@ SEXP R_mongo_collection_insert_page(SEXP ptr_col, SEXP json_vec, SEXP stop_on_er
     b = bson_new_from_json ((uint8_t*)translateCharUTF8(asChar(STRING_ELT(json_vec, i))), -1, &err);
     if(!b){
       mongoc_bulk_operation_destroy (bulk);
-      error(err.message);
+      stop(err.message);
     }
     mongoc_bulk_operation_insert(bulk, b);
     bson_destroy (b);
@@ -138,7 +119,7 @@ SEXP R_mongo_collection_create_index(SEXP ptr_col, SEXP ptr_bson) {
   bson_error_t err;
 
   if(!mongoc_collection_create_index(col, b, options, &err))
-    error(err.message);
+    stop(err.message);
 
   return ScalarLogical(1);
 }
@@ -149,7 +130,7 @@ SEXP R_mongo_collection_drop_index(SEXP ptr_col, SEXP name) {
   bson_error_t err;
 
   if(!mongoc_collection_drop_index(col, str, &err))
-    error(err.message);
+    stop(err.message);
 
   return ScalarLogical(1);
 }
@@ -161,7 +142,7 @@ SEXP R_mongo_collection_remove(SEXP ptr_col, SEXP ptr_bson, SEXP all){
   mongoc_remove_flags_t flags = asLogical(all) ? MONGOC_REMOVE_NONE : MONGOC_REMOVE_SINGLE_REMOVE;
 
   if(!mongoc_collection_remove(col, flags, b, NULL, &err))
-    error(err.message);
+    stop(err.message);
 
   return ScalarLogical(1);
 }
@@ -178,13 +159,13 @@ SEXP R_mongo_collection_find(SEXP ptr_col, SEXP ptr_query, SEXP ptr_fields, SEXP
   return cursor2r(c);
 }
 
-SEXP R_mongo_collection_command(SEXP ptr_col, SEXP command){
+SEXP R_mongo_collection_command_simple(SEXP ptr_col, SEXP command){
   mongoc_collection_t *col = r2col(ptr_col);
   bson_t *cmd = r2bson(command);
   bson_t reply;
   bson_error_t err;
   if(!mongoc_collection_command_simple(col, cmd, NULL, &reply, &err))
-    Rf_error(err.message);
+    stop(err.message);
 
   SEXP out = PROTECT(bson2list(&reply));
   bson_destroy (&reply);
@@ -197,7 +178,7 @@ SEXP R_mongo_collection_stats(SEXP ptr_col){
   bson_t reply;
   bson_error_t err;
   if(!mongoc_collection_stats(col, NULL, &reply, &err))
-    Rf_error(err.message);
+    stop(err.message);
 
   SEXP out = PROTECT(bson2list(&reply));
   bson_destroy (&reply);
@@ -211,7 +192,7 @@ SEXP R_mongo_collection_find_indexes(SEXP ptr_col) {
 
   mongoc_cursor_t *c = mongoc_collection_find_indexes (col, &err);
   if(!c)
-    Rf_error(err.message);
+    stop(err.message);
 
   return cursor2r(c);
 }
@@ -224,7 +205,7 @@ SEXP R_mongo_collection_rename(SEXP ptr_col, SEXP db, SEXP name) {
     new_db = translateCharUTF8(asChar(db));
 
   if(!mongoc_collection_rename(col, new_db, translateCharUTF8(asChar(name)), false, &err))
-    error(err.message);
+    stop(err.message);
   return ScalarLogical(1);
 }
 
@@ -233,6 +214,15 @@ SEXP R_mongo_collection_aggregate(SEXP ptr_col, SEXP ptr_pipeline) {
   bson_t *pipeline = r2bson(ptr_pipeline);
   mongoc_cursor_t *c = mongoc_collection_aggregate (col, MONGOC_QUERY_NONE, pipeline, NULL, NULL);
   if(!c)
-    error("Error executing pipeline.");
+    stop("Error executing pipeline.");
+  return cursor2r(c);
+}
+
+SEXP R_mongo_collection_command(SEXP ptr_col, SEXP ptr_cmd){
+  mongoc_collection_t *col = r2col(ptr_col);
+  bson_t *cmd = r2bson(ptr_cmd);
+  mongoc_cursor_t *c = mongoc_collection_command(col, MONGOC_QUERY_NONE, 0, 0, 0, cmd, NULL, NULL);
+  if(!c)
+    stop("Error executing command.");
   return cursor2r(c);
 }

@@ -1,10 +1,11 @@
 Package: mongolite
 Type: Package
-Title: Streaming 'MongoDB' Client for R
-Description: R bindings to the high-performance 'MongoDB' C driver and
-    high-level IO tools in the same spirit as 'jsonlite'.
-Version: 0.2
-Date: 2015-04-10
+Title: Fast and Simple 'MongoDB' Client for R
+Description: High-level 'MongoDB' client based on 'jsonlite' and mongo-c-driver.
+    Includes support for aggregation, indexing, map-reduce, streaming, TLS and
+    LDAP (SASL) authentication.
+Version: 0.3
+Date: 2015-05-12
 Authors@R: c(
     person("Jeroen", "Ooms", ,"jeroen.ooms@stat.ucla.edu", role = c("aut", "cre")),
     person("MongoDB, Inc", role = "cph", comment = "Author of mongo-c-driver")
@@ -20,9 +21,9 @@ SystemRequirements: OpenSSL: libssl-dev (deb) or openssl-devel (rpm) or
         (rpm) or sasl_dev (csw).
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2015-04-12 09:21:51 UTC; ripley
+NeedsCompilation: yes
+Packaged: 2015-05-12 23:40:09 UTC; jeroen
 Author: Jeroen Ooms [aut, cre],
   MongoDB, Inc [cph] (Author of mongo-c-driver)
-NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2015-04-12 11:22:05
+Date/Publication: 2015-05-13 08:49:54

@@ -1,9 +1,15 @@
 #' @useDynLib mongolite R_mongo_collection_new
-mongo_collection_new <- function(uri = "mongodb://localhost", db = "test", collection = "test"){
-  stopifnot(is.character(uri))
+mongo_collection_new <- function(client, db = "test", collection = "test"){
+  stopifnot(is(client, "mongo_client"))
   stopifnot(is.character(db))
   stopifnot(is.character(collection))
-  .Call(R_mongo_collection_new, uri, db, collection)
+  .Call(R_mongo_collection_new, client, db, collection)
+}
+
+#' @useDynLib mongolite R_mongo_client_new
+mongo_client_new <- function(uri = "mongodb://localhost"){
+  stopifnot(is.character(uri))
+  .Call(R_mongo_client_new, uri)
 }
 
 #' @useDynLib mongolite R_mongo_client_server_status
@@ -39,9 +45,36 @@ mongo_collection_count <- function(col, query = "{}"){
   .Call(R_mongo_collection_count, col, bson_or_json(query))
 }
 
+#' @useDynLib mongolite R_mongo_collection_command_simple
+mongo_collection_command_simple <- function(col, command = "{}"){
+  #returns data
+  .Call(R_mongo_collection_command_simple, col, bson_or_json(command))
+}
+
 #' @useDynLib mongolite R_mongo_collection_command
 mongo_collection_command <- function(col, command = "{}"){
+  #returns cursor
   .Call(R_mongo_collection_command, col, bson_or_json(command))
+}
+
+# Wrapper for mapReduce command
+mongo_collection_mapreduce <- function(col, map, reduce){
+  cmd <- list(
+    mapreduce = mongo_collection_name(col),
+    map = map,
+    reduce = reduce,
+    out = list(inline = 1)
+  )
+  mongo_collection_command(col, jsonlite::toJSON(cmd, auto_unbox = TRUE))
+}
+
+mongo_collection_distinct <- function(col, key, query){
+  cmd <- list(
+    distinct = mongo_collection_name(col),
+    key = key,
+    query = structure(query, class="json")
+  )
+  mongo_collection_command_simple(col, jsonlite::toJSON(cmd, json_verbatim = TRUE, auto_unbox = TRUE))
 }
 
 #' @useDynLib mongolite R_mongo_collection_insert_bson
@@ -68,9 +101,12 @@ mongo_collection_remove <- function(col, doc, multiple = TRUE){
 }
 
 #' @useDynLib mongolite R_mongo_collection_find
-mongo_collection_find <- function(col, query = '{}', fields = '{"_id" : 0}', skip = 0, limit = 0){
+mongo_collection_find <- function(col, query = '{}', sort = '{"_id":1}', fields = '{"_id":0}', skip = 0, limit = 0){
   stopifnot(is.numeric(skip))
   stopifnot(is.numeric(limit))
+  if(!missing(sort) && !identical(sort, '{}') && !("$query" %in% names(fromJSON(query)))){
+    query <- paste('{"$query":', query, ', "$orderby":', sort, '}')
+  }
   .Call(R_mongo_collection_find, col, bson_or_json(query), bson_or_json(fields), skip, limit)
 }
 

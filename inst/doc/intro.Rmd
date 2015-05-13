@@ -1,16 +1,13 @@
 ---
-title: "Getting started with mongolite"
+title: "Getting started with MongoDB in R"
 date: "`r Sys.Date()`"
 output:
   html_document
 vignette: >
-  %\VignetteIndexEntry{Intro to the mongolite package}
+  %\VignetteIndexEntry{Getting started with MongoDB in R}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-
-Install
--------
 
 On most platforms, starting the MongoDB server is as easy as:
 
@@ -18,13 +15,7 @@ On most platforms, starting the MongoDB server is as easy as:
 mongod
 ```
 
-To install the latest development version:
-
-```r
-library(devtools)
-install_github("jeroenooms/jsonlite")
-install_github("jeroenooms/mongolite")
-```
+If this is the first time you run MongoDB, you need to create a directory `/data/db` and make it writable (use `C:/data/db` on Windows).
 
 Hello World
 -----------
@@ -48,6 +39,9 @@ out <- m$find('{"cut" : "Premium", "price" : { "$lt" : 1000 } }')
 # Compare
 nrow(out)
 nrow(subset(diamonds, cut == "Premium" & price < 1000))
+
+# Remove the collection
+m$drop()
 ```
 
 Flights
@@ -66,14 +60,31 @@ m$count('{"month":1, "day":1}')
 jan1 <- m$find('{"month":1, "day":1}')
 
 # Sorting
-jan1 <- m$find('{"$query":{"month":1,"day":1}, "$orderby":{"distance":-1}}')
+jan1 <- m$find('{"month":1,"day":1}', sort='{"distance":-1}')
 head(jan1)
+
+# Sorting on large data requires index
+m$index(add = "distance")
+allflights <- m$find(sort='{"distance":-1}')
 
 # Select columns
 jan1 <- m$find('{"month":1,"day":1}', fields = '{"_id":0, "distance":1, "carrier":1}')
 
+# List unique values
+m$distinct("carrier")
+m$distinct("carrier", '{"distance":{"$gt":3000}}')
+
 # Tabulate
 m$aggregate('[{"$group":{"_id":"$carrier", "count": {"$sum":1}, "average":{"$avg":"$distance"}}}]')
+
+# Map-reduce (binning)
+hist <- m$mapreduce(
+  map = "function(){emit(Math.floor(this.distance/100)*100, 1)}", 
+  reduce = "function(id, counts){return Array.sum(counts)}"
+)
+
+# Remove the collection
+m$drop()
 ```
 
 Combine with jsonlite
