@@ -41,4 +41,15 @@
 #endif
 
 
+/*
+ * MONGOC_HAVE_SASL_CLIENT_DONE is set from configure to determine if we
+ * have SASL and its version is new enough to use sasl_client_done (),
+ * which supersedes sasl_done ().
+ */
+
+#if MONGOC_HAVE_SASL_CLIENT_DONE != 1
+#  undef MONGOC_HAVE_SASL_CLIENT_DONE
+#endif
+
+
 #endif /* MONGOC_CONFIG_H */

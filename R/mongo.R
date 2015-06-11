@@ -58,12 +58,15 @@ mongo_collection_command <- function(col, command = "{}"){
 }
 
 # Wrapper for mapReduce command
-mongo_collection_mapreduce <- function(col, map, reduce){
+mongo_collection_mapreduce <- function(col, map, reduce, out, scope){
+  if(is.null(out))
+    out <- list(inline = 1)
   cmd <- list(
     mapreduce = mongo_collection_name(col),
     map = map,
     reduce = reduce,
-    out = list(inline = 1)
+    scope = scope,
+    out = out
   )
   mongo_collection_command(col, jsonlite::toJSON(cmd, auto_unbox = TRUE))
 }
@@ -101,10 +104,10 @@ mongo_collection_remove <- function(col, doc, multiple = TRUE){
 }
 
 #' @useDynLib mongolite R_mongo_collection_find
-mongo_collection_find <- function(col, query = '{}', sort = '{"_id":1}', fields = '{"_id":0}', skip = 0, limit = 0){
+mongo_collection_find <- function(col, query = '{}', sort = '{}', fields = '{"_id":0}', skip = 0, limit = 0){
   stopifnot(is.numeric(skip))
   stopifnot(is.numeric(limit))
-  if(!missing(sort) && !identical(sort, '{}') && !("$query" %in% names(fromJSON(query)))){
+  if(!identical(sort, '{}') && !("$query" %in% names(fromJSON(query)))){
     query <- paste('{"$query":', query, ', "$orderby":', sort, '}')
   }
   .Call(R_mongo_collection_find, col, bson_or_json(query), bson_or_json(fields), skip, limit)
@@ -142,6 +145,16 @@ mongo_cursor_next_bson <- function(cursor){
   .Call(R_mongo_cursor_next_bson, cursor)
 }
 
+#' @useDynLib mongolite R_mongo_cursor_next_json
+mongo_cursor_next_json <- function(cursor, n = 1){
+  .Call(R_mongo_cursor_next_json, cursor, n = n)
+}
+
+#' @useDynLib mongolite R_mongo_cursor_next_bsonlist
+mongo_cursor_next_bsonlist <- function(cursor, n = 1){
+  .Call(R_mongo_cursor_next_bsonlist, cursor, n = n)
+}
+
 #' @useDynLib mongolite R_mongo_cursor_next_page
 mongo_cursor_next_page <- function(cursor, size = 100){
   .Call(R_mongo_cursor_next_page, cursor, size = size)
@@ -153,4 +166,13 @@ mongo_collection_find_indexes <- function(col){
   out <- mongo_cursor_next_page(cur)
   out <- Filter(length, out)
   as.data.frame(jsonlite:::simplify(out))
+}
+
+#' @useDynLib mongolite R_mongo_restore
+mongo_restore <- function(col, con, verbose = FALSE){
+  if(!isOpen(con)){
+    open(con, "rb")
+    on.exit(close(con))
+  }
+  .Call(R_mongo_restore, con, col, verbose)
 }

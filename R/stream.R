@@ -57,9 +57,67 @@ mongo_stream_in <- function(cur, handler = NULL, pagesize = 1000, verbose = TRUE
 
 post_process <- function(x){
   df <- as.data.frame(jsonlite:::simplify(x))
-  idcol <- match("_id", names(df))
-  if(!is.na(idcol)){
-    df[[idcol]] <- vapply(df[[idcol]], function(x){paste(format(x), collapse="")}, character(1))
-  }
+  #idcol <- match("_id", names(df))
+  #if(!is.na(idcol) && is.list(df[[idcol]]) && all(vapply(df[[idcol]], is.raw, logical(1)))){
+  #  df[[idcol]] <- vapply(df[[idcol]], function(x){paste(format(x), collapse="")}, character(1))
+  #}
   df
+}
+
+mongo_export <- function(col, con = stdout(), verbose = FALSE){
+  stopifnot(is(con, "connection"))
+  if(!isOpen(con)){
+    open(con, "w")
+    on.exit(close(con))
+  }
+  cur <- mongo_collection_find(col, query = '{}', fields = '{}', sort = '{"_id":1}')
+  count = 0;
+  while(length(json <- mongo_cursor_next_json(cur, n = 100))){
+    writeLines(json, con)
+    count <- count + length(json);
+    if(verbose)
+      cat("\rExported", count, "lines...")
+  }
+  if(verbose) cat("\rDone! Exported a total of", count, "lines.\n")
+  invisible(count)
+}
+
+# Same as mongo_export but with (binary) bson output
+mongo_dump <- function(col, con = stdout(), verbose = FALSE){
+  stopifnot(is(con, "connection"))
+  if(!isOpen(con)){
+    open(con, "wb")
+    on.exit(close(con))
+  }
+  cur <- mongo_collection_find(col, query = '{}', fields = '{}')
+  count <- 0;
+  while(length(bson <- mongo_cursor_next_bsonlist(cur, n = 100))){
+    lapply(bson, writeBin, con = con)
+    count <- count + length(bson);
+    if(verbose)
+      cat("\rExported", count, "lines...")
+  }
+  if(verbose) cat("\rDone! Exported a total of", count, "lines.\n")
+  invisible(count)
+}
+
+mongo_import <- function(col, con, verbose = FALSE){
+  stopifnot(is(con, "connection"))
+  if(!isOpen(con)){
+    open(con, "r")
+    on.exit(close(con))
+  }
+  count <- 0;
+  while(length(json <- readLines(con, n = 100))) {
+    json <- Filter(function(x){!grepl("^\\s*$", x)}, json)
+    if(!all(vapply(json, jsonlite::validate, logical(1))))
+      stop("Invalid JSON. Data must be in newline delimited json format (http://ndjson.org/)")
+    mongo_collection_insert_page(col, json)
+    count <- count + length(json)
+    if(verbose)
+      cat("\rImported", count, "lines...")
+  }
+  if(verbose)
+    cat("\rDone! Imported a total of", count, "lines.\n")
+  invisible(count)
 }

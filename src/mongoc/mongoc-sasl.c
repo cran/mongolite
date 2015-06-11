@@ -151,8 +151,6 @@ _mongoc_sasl_init (mongoc_sasl_t *sasl)
    sasl->service_name = NULL;
    sasl->service_host = NULL;
    sasl->interact = NULL;
-
-   sasl_client_init (sasl->callbacks);
 }
 
 
@@ -170,13 +168,6 @@ _mongoc_sasl_destroy (mongoc_sasl_t *sasl)
    free (sasl->mechanism);
    free (sasl->service_name);
    free (sasl->service_host);
-
-#if (SASL_VERSION_MAJOR >= 2) && \
-    (SASL_VERSION_MINOR >= 1) && \
-    (SASL_VERSION_STEP >= 24) && \
-    (!defined(__APPLE__))
-   sasl_client_done ();
-#endif
 }
 
 
@@ -299,15 +290,6 @@ _mongoc_sasl_step (mongoc_sasl_t *sasl,
    BSON_ASSERT (inbuf);
    BSON_ASSERT (outbuf);
    BSON_ASSERT (outbuflen);
-
-   if (!sasl->step && !*outbuflen) {
-      bson_set_error (error,
-                      MONGOC_ERROR_SASL,
-                      MONGOC_ERROR_CLIENT_AUTHENTICATE,
-                      "SASL Failure: no data received from SASL request. "
-                      "Does server have SASL support enabled?");
-      return false;
-   }
 
    sasl->step++;
 

@@ -4,7 +4,8 @@
 \alias{mongo}
 \title{MongoDB client}
 \usage{
-mongo(collection = "test", db = "test", url = "mongodb://localhost")
+mongo(collection = "test", db = "test", url = "mongodb://localhost",
+  verbose = TRUE)
 }
 \arguments{
 \item{collection}{name of collection}
@@ -12,6 +13,8 @@ mongo(collection = "test", db = "test", url = "mongodb://localhost")
 \item{db}{name of database}
 
 \item{url}{address of the mongodb server}
+
+\item{verbose}{emit some more output}
 }
 \value{
 Upon success returns a pointer to a collection on the server.
@@ -23,17 +26,19 @@ Connect to a MongoDB collection.
 \section{Methods}{
 
 \describe{
-  \item{\code{aggregate(pipeline = '{}', handler = NULL, pagesize = 1000, verbose = TRUE)}}{Execute a pipeline using the Mongo aggregation framework.}
+  \item{\code{aggregate(pipeline = '{}', handler = NULL, pagesize = 1000)}}{Execute a pipeline using the Mongo aggregation framework.}
   \item{\code{count(query = '{}')}}{Count the number of records matching a given \code{query}. Default counts all records in collection.}
   \item{\code{distinct(key, query = '{}')}}{List unique values of a field given a particular query.}
   \item{\code{drop()}}{Delete entire collection with all data and metadata.}
-  \item{\code{find(query = '{}', fields = '{"_id" : 0}', skip = 0, limit = 0, handler = NULL, pagesize = 1000, verbose = TRUE)}}{Retrieve \code{fields} from records matching \code{query}. Default \code{handler} will return all data as a single dataframe.}
+  \item{\code{export(con = stdout(), bson = FALSE)}}{Streams all data from collection to a \code{\link{connection}} in \href{http://ndjson.org}{jsonlines} format (similar to \href{http://docs.mongodb.org/v2.6/reference/mongoexport/}{mongoexport}). Alternatively when \code{bson = TRUE} it outputs the binary \href{http://bsonspec.org/faq.html}{bson} format (similar to \href{http://docs.mongodb.org/manual/reference/program/mongodump/}{mongodump}).}
+  \item{\code{find(query = '{}', fields = '{"_id" : 0}', skip = 0, limit = 0, handler = NULL, pagesize = 1000)}}{Retrieve \code{fields} from records matching \code{query}. Default \code{handler} will return all data as a single dataframe.}
+  \item{\code{import(con, bson = FALSE)}}{Stream import data in \href{http://ndjson.org}{jsonlines} format from a \code{\link{connection}}, similar to the \href{http://docs.mongodb.org/v2.6/reference/mongoimport/}{mongoimport} utility. Alternatively when \code{bson = TRUE} it assumes the binary \href{http://bsonspec.org/faq.html}{bson} format (similar to \href{http://docs.mongodb.org/manual/reference/program/mongorestore/}{mongorestore}).}
   \item{\code{index(add = NULL, remove = NULL)}}{List, add, or remove indexes from the collection. The \code{add} and \code{remove} arguments can either be a field name or json object. Returns a dataframe with current indexes.}
   \item{\code{info()}}{Returns collection statistics and server info (if available).}
-  \item{\code{insert(data, pagesize = 1000, verbose = TRUE)}}{Insert a dataframe into the collection.}
-  \item{\code{mapreduce(map, reduce)}}{Performs a map reduce query. The \code{map} and \code{reduce} arguments are strings containing a JavaScript function.}
+  \item{\code{insert(data, pagesize = 1000)}}{Insert a dataframe into the collection.}
+  \item{\code{mapreduce(map, reduce, out, scope)}}{Performs a map reduce query. The \code{map} and \code{reduce} arguments are strings containing a JavaScript function. Set \code{out} to a string to store results in a collection instead of returning.}
   \item{\code{remove(query = "{}", multiple = FALSE)}}{Remove record(s) matching \code{query} from the collection.}
-  \item{\code{rename(name, db = "test")}}{Change the name or database of a collection. Changing name is cheap, changing database is expensive.}
+  \item{\code{rename(name, db = NULL)}}{Change the name or database of a collection. Changing name is cheap, changing database is expensive.}
   \item{\code{update(query, update = '{"$set":{}}', upsert = FALSE, multiple = FALSE)}}{Replace or modify matching record(s) with value of the \code{update} argument.}
 }
 }
@@ -75,8 +80,20 @@ hist <- m$mapreduce(
   reduce = "function(id, counts){return Array.sum(counts)}"
 )
 
+# Stream jsonlines into a connection
+tmp <- tempfile()
+m$export(file(tmp))
+
 # Remove the collection
 m$drop()
+
+# Import from jsonlines stream from connection
+dmd <- mongo("diamonds")
+dmd$import(url("http://jeroenooms.github.io/data/diamonds.json))
+dmd$count()
+
+# Export
+dmd$drop()
 }
 }
 \references{

@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2015-05-12" />
+<meta name="date" content="2015-06-11" />
 
 <title>Getting started with MongoDB in R</title>
 
@@ -62,7 +62,7 @@ img {
 
 <div id="header">
 <h1 class="title">Getting started with MongoDB in R</h1>
-<h4 class="date"><em>2015-05-12</em></h4>
+<h4 class="date"><em>2015-06-11</em></h4>
 </div>
 
 
@@ -90,8 +90,31 @@ out &lt;- m$find('{&quot;cut&quot; : &quot;Premium&quot;, &quot;price&quot; : { 
 nrow(out)
 nrow(subset(diamonds, cut == &quot;Premium&quot; &amp; price &lt; 1000))
 
+# Cross-table
+tbl &lt;- m$mapreduce(
+  map = &quot;function(){emit({cut:this.cut, color:this.color}, 1)}&quot;,
+  reduce = &quot;function(id, counts){return Array.sum(counts)}&quot;
+)
+# Same as:
+data.frame(with(diamonds, table(cut, color)))
+
+# Stream jsonlines into a connection
+tmp &lt;- tempfile()
+m$export(file(tmp))
+
+# Stream it back in R
+library(jsonlite)
+mydata &lt;- stream_in(file(tmp))
+
+# Or into mongo
+m2 &lt;- mongo(&quot;diamonds2&quot;)
+m2$count()
+m2$import(file(tmp))
+m2$count()
+
 # Remove the collection
-m$drop()</code></pre>
+m$drop()
+m2$drop()</code></pre>
 </div>
 <div id="flights" class="section level2">
 <h2>Flights</h2>
@@ -129,8 +152,17 @@ hist &lt;- m$mapreduce(
   reduce = &quot;function(id, counts){return Array.sum(counts)}&quot;
 )
 
+# Dump to bson
+dump &lt;- tempfile()
+m$export(file(dump), bson = TRUE)
+
 # Remove the collection
-m$drop()</code></pre>
+m$drop()
+
+# Restore
+m$count()
+m$import(file(dump), bson = TRUE)
+m$count()</code></pre>
 </div>
 <div id="combine-with-jsonlite" class="section level2">
 <h2>Combine with jsonlite</h2>
