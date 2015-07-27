@@ -4,7 +4,8 @@ mongo_stream_out <- function(data, mongo, pagesize = 1000, verbose = TRUE){
   stopifnot(is.numeric(pagesize))
   stopifnot(is.logical(verbose))
   FUN <- function(x){
-    mongo_collection_insert_page(mongo, jsonlite:::asJSON(x, digits = 9, collapse = FALSE))
+    mongo_collection_insert_page(mongo, jsonlite:::asJSON(x, digits = 9,
+      POSIXt = "mongo", raw = "mongo", collapse = FALSE))
   }
   jsonlite:::apply_by_pages(data, FUN, pagesize = pagesize, verbose = verbose)
   TRUE
@@ -65,7 +66,7 @@ post_process <- function(x){
 }
 
 mongo_export <- function(col, con = stdout(), verbose = FALSE){
-  stopifnot(is(con, "connection"))
+  stopifnot(inherits(con, "connection"))
   if(!isOpen(con)){
     open(con, "w")
     on.exit(close(con))
@@ -84,7 +85,7 @@ mongo_export <- function(col, con = stdout(), verbose = FALSE){
 
 # Same as mongo_export but with (binary) bson output
 mongo_dump <- function(col, con = stdout(), verbose = FALSE){
-  stopifnot(is(con, "connection"))
+  stopifnot(inherits(con, "connection"))
   if(!isOpen(con)){
     open(con, "wb")
     on.exit(close(con))
@@ -102,7 +103,7 @@ mongo_dump <- function(col, con = stdout(), verbose = FALSE){
 }
 
 mongo_import <- function(col, con, verbose = FALSE){
-  stopifnot(is(con, "connection"))
+  stopifnot(inherits(con, "connection"))
   if(!isOpen(con)){
     open(con, "r")
     on.exit(close(con))

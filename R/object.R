@@ -3,7 +3,8 @@
 #' Connect to a MongoDB collection.
 #'
 #' @export
-#' @param url address of the mongodb server
+#' @param url address of the mongodb server in mongo connection string
+#' \href{http://docs.mongodb.org/manual/reference/connection-string/}{URI format}.
 #' @param db name of database
 #' @param collection name of collection
 #' @param verbose emit some more output
@@ -68,12 +69,13 @@
 #'   \item{\code{distinct(key, query = '{}')}}{List unique values of a field given a particular query.}
 #'   \item{\code{drop()}}{Delete entire collection with all data and metadata.}
 #'   \item{\code{export(con = stdout(), bson = FALSE)}}{Streams all data from collection to a \code{\link{connection}} in \href{http://ndjson.org}{jsonlines} format (similar to \href{http://docs.mongodb.org/v2.6/reference/mongoexport/}{mongoexport}). Alternatively when \code{bson = TRUE} it outputs the binary \href{http://bsonspec.org/faq.html}{bson} format (similar to \href{http://docs.mongodb.org/manual/reference/program/mongodump/}{mongodump}).}
-#'   \item{\code{find(query = '{}', fields = '{"_id" : 0}', skip = 0, limit = 0, handler = NULL, pagesize = 1000)}}{Retrieve \code{fields} from records matching \code{query}. Default \code{handler} will return all data as a single dataframe.}
+#'   \item{\code{find(query = '{}', fields = '{"_id" : 0}', sort = '{}', skip = 0, limit = 0, handler = NULL, pagesize = 1000)}}{Retrieve \code{fields} from records matching \code{query}. Default \code{handler} will return all data as a single dataframe.}
 #'   \item{\code{import(con, bson = FALSE)}}{Stream import data in \href{http://ndjson.org}{jsonlines} format from a \code{\link{connection}}, similar to the \href{http://docs.mongodb.org/v2.6/reference/mongoimport/}{mongoimport} utility. Alternatively when \code{bson = TRUE} it assumes the binary \href{http://bsonspec.org/faq.html}{bson} format (similar to \href{http://docs.mongodb.org/manual/reference/program/mongorestore/}{mongorestore}).}
 #'   \item{\code{index(add = NULL, remove = NULL)}}{List, add, or remove indexes from the collection. The \code{add} and \code{remove} arguments can either be a field name or json object. Returns a dataframe with current indexes.}
 #'   \item{\code{info()}}{Returns collection statistics and server info (if available).}
 #'   \item{\code{insert(data, pagesize = 1000)}}{Insert a dataframe into the collection.}
-#'   \item{\code{mapreduce(map, reduce, out, scope)}}{Performs a map reduce query. The \code{map} and \code{reduce} arguments are strings containing a JavaScript function. Set \code{out} to a string to store results in a collection instead of returning.}
+#'   \item{\code{iterate(query = '{}', fields = '{"_id":0}', sort = '{}', skip = 0, limit = 0)}}{Runs query and returns iterator to read single records one-by-one.}
+#'   \item{\code{mapreduce(map, reduce, query = '{}', sort = '{}', limit = 0, out = NULL, scope = NULL)}}{Performs a map reduce query. The \code{map} and \code{reduce} arguments are strings containing a JavaScript function. Set \code{out} to a string to store results in a collection instead of returning.}
 #'   \item{\code{remove(query = "{}", multiple = FALSE)}}{Remove record(s) matching \code{query} from the collection.}
 #'   \item{\code{rename(name, db = NULL)}}{Change the name or database of a collection. Changing name is cheap, changing database is expensive.}
 #'   \item{\code{update(query, update = '{"$set":{}}', upsert = FALSE, multiple = FALSE)}}{Replace or modify matching record(s) with value of the \code{update} argument.}
@@ -81,7 +83,16 @@
 #' @references Jeroen Ooms (2014). The \code{jsonlite} Package: A Practical and Consistent Mapping Between JSON Data and \R{} Objects. \emph{arXiv:1403.2805}. \url{http://arxiv.org/abs/1403.2805}
 mongo <- function(collection = "test",  db = "test", url = "mongodb://localhost", verbose = TRUE){
   client <- mongo_client_new(url)
+
+  # workaround for missing 'mongoc_client_get_default_database'
+  if(is.null(db) || db == "test"){
+    path <- get_path_from_url(url)
+    if(!is.null(path))
+      db <- path
+  }
+
   col <- mongo_collection_new(client, collection, db)
+  mongo_collection_command_simple(col, '{"ping":1}')
   mongo_object(col, client, verbose = verbose)
 }
 
@@ -93,6 +104,11 @@ mongo_object <- function(col, client, verbose){
     find <- function(query = '{}', fields = '{"_id":0}', sort = '{}', skip = 0, limit = 0, handler = NULL, pagesize = 1000){
       cur <- mongo_collection_find(col, query = query, sort = sort, fields = fields, skip = skip, limit = limit)
       mongo_stream_in(cur, handler = handler, pagesize = pagesize, verbose = verbose)
+    }
+
+    iterate <- function(query = '{}', fields = '{"_id":0}', sort = '{}', skip = 0, limit = 0) {
+      cur <- mongo_collection_find(col, query = query, sort = sort, fields = fields, skip = skip, limit = limit)
+      mongo_iterator(cur)
     }
 
     export <- function(con = stdout(), bson = FALSE){
@@ -128,8 +144,9 @@ mongo_object <- function(col, client, verbose){
     update <- function(query, update = '{"$set":{}}', upsert = FALSE, multiple = FALSE)
       mongo_collection_update(col, query, update, upsert, multiple)
 
-    mapreduce <- function(map, reduce, out = NULL, scope = NULL){
-      cur <- mongo_collection_mapreduce(col, map, reduce, out = out, scope = scope)
+    mapreduce <- function(map, reduce, query = '{}', sort = '{}', limit = 0, out = NULL, scope = NULL){
+      cur <- mongo_collection_mapreduce(col, map = map, reduce = reduce, query = query,
+        sort = sort, limit = limit, out = out, scope = scope)
       results <- mongo_stream_in(cur, verbose = FALSE)
       if(is.null(out))
         results[[1, "results"]]
