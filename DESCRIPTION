@@ -4,7 +4,7 @@ Title: Fast and Simple 'MongoDB' Client for R
 Description: High-level 'MongoDB' client based on 'jsonlite' and 'mongoc' driver.
     Includes support for aggregation, indexing, map-reduce, streaming, 'TLS'
     encryption and 'SASL' authentication.
-Version: 0.5
+Version: 0.6
 Authors@R: c(
     person("Jeroen", "Ooms", ,"jeroen.ooms@stat.ucla.edu", role = c("aut", "cre")),
     person("MongoDB, Inc", role = "cph", comment = "Author of mongo-c-driver")
@@ -21,8 +21,8 @@ SystemRequirements: OpenSSL: libssl-dev (deb) or openssl-devel (rpm) or
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2015-07-26 22:41:13 UTC; jeroen
+Packaged: 2015-10-31 11:59:14 UTC; jeroen
 Author: Jeroen Ooms [aut, cre],
   MongoDB, Inc [cph] (Author of mongo-c-driver)
 Repository: CRAN
-Date/Publication: 2015-07-27 10:52:08
+Date/Publication: 2015-10-31 19:29:58

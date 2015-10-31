@@ -29,6 +29,8 @@
 
 BSON_BEGIN_DECLS
 
+/* forward decl */
+typedef struct _mongoc_topology_t mongoc_topology_t;
 
 struct _mongoc_read_prefs_t
 {
@@ -37,9 +39,24 @@ struct _mongoc_read_prefs_t
 };
 
 
-int _mongoc_read_prefs_score (const mongoc_read_prefs_t   *read_prefs,
-                              const mongoc_cluster_node_t *node);
+typedef struct _mongoc_apply_read_prefs_result_t {
+   bson_t              *query_with_read_prefs;
+   bool                 query_owned;
+   mongoc_query_flags_t flags;
+} mongoc_apply_read_prefs_result_t;
 
+
+#define READ_PREFS_RESULT_INIT { NULL, false, MONGOC_QUERY_NONE }
+
+void
+apply_read_preferences (const mongoc_read_prefs_t *read_prefs,
+                        const mongoc_server_stream_t *server_stream,
+                        const bson_t *query_bson,
+                        mongoc_query_flags_t initial_flags,
+                        mongoc_apply_read_prefs_result_t *result);
+
+void
+apply_read_prefs_result_cleanup (mongoc_apply_read_prefs_result_t *result);
 
 BSON_END_DECLS
 

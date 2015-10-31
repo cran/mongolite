@@ -17,9 +17,9 @@
 
 #include <bson.h>
 
-#include "mongoc-log.h"
-#include "mongoc-opcode.h"
+#include "mongoc.h"
 #include "mongoc-rpc-private.h"
+#include "mongoc-trace.h"
 
 
 #define RPC(_name, _code) \
@@ -28,29 +28,29 @@
                                mongoc_array_t *array) \
    { \
       mongoc_iovec_t iov; \
-      BSON_ASSERT(rpc); \
-      BSON_ASSERT(array); \
+      assert (rpc); \
+      assert (array); \
       rpc->msg_len = 0; \
       _code \
    }
 #define INT32_FIELD(_name) \
    iov.iov_base = (void *)&rpc->_name; \
    iov.iov_len = 4; \
-   BSON_ASSERT(iov.iov_len); \
+   assert (iov.iov_len); \
    rpc->msg_len += (int32_t)iov.iov_len; \
    _mongoc_array_append_val(array, iov);
 #define ENUM_FIELD INT32_FIELD
 #define INT64_FIELD(_name) \
    iov.iov_base = (void *)&rpc->_name; \
    iov.iov_len = 8; \
-   BSON_ASSERT(iov.iov_len); \
+   assert (iov.iov_len); \
    rpc->msg_len += (int32_t)iov.iov_len; \
    _mongoc_array_append_val(array, iov);
 #define CSTRING_FIELD(_name) \
-   BSON_ASSERT(rpc->_name); \
+   assert (rpc->_name); \
    iov.iov_base = (void *)rpc->_name; \
    iov.iov_len = strlen(rpc->_name) + 1; \
-   BSON_ASSERT(iov.iov_len); \
+   assert (iov.iov_len); \
    rpc->msg_len += (int32_t)iov.iov_len; \
    _mongoc_array_append_val(array, iov);
 #define BSON_FIELD(_name) \
@@ -60,7 +60,7 @@
       __l = BSON_UINT32_FROM_LE(__l); \
       iov.iov_base = (void *)rpc->_name; \
       iov.iov_len = __l; \
-      BSON_ASSERT(iov.iov_len); \
+      assert (iov.iov_len); \
       rpc->msg_len += (int32_t)iov.iov_len; \
       _mongoc_array_append_val(array, iov); \
    } while (0);
@@ -70,16 +70,16 @@
    if (rpc->_name##_len) { \
       iov.iov_base = (void *)rpc->_name; \
       iov.iov_len = rpc->_name##_len; \
-      BSON_ASSERT(iov.iov_len); \
+      assert (iov.iov_len); \
       rpc->msg_len += (int32_t)iov.iov_len; \
       _mongoc_array_append_val(array, iov); \
    }
 #define IOVEC_ARRAY_FIELD(_name) \
    do { \
       ssize_t _i; \
-      BSON_ASSERT(rpc->n_##_name); \
+      assert (rpc->n_##_name); \
       for (_i = 0; _i < rpc->n_##_name; _i++) { \
-         BSON_ASSERT(rpc->_name[_i].iov_len); \
+         assert (rpc->_name[_i].iov_len); \
          rpc->msg_len += (int32_t)rpc->_name[_i].iov_len; \
          _mongoc_array_append_val(array, rpc->_name[_i]); \
       } \
@@ -87,18 +87,18 @@
 #define RAW_BUFFER_FIELD(_name) \
    iov.iov_base = (void *)rpc->_name; \
    iov.iov_len = rpc->_name##_len; \
-   BSON_ASSERT(iov.iov_len); \
+   assert (iov.iov_len); \
    rpc->msg_len += (int32_t)iov.iov_len; \
    _mongoc_array_append_val(array, iov);
 #define INT64_ARRAY_FIELD(_len, _name) \
    iov.iov_base = (void *)&rpc->_len; \
    iov.iov_len = 4; \
-   BSON_ASSERT(iov.iov_len); \
+   assert (iov.iov_len); \
    rpc->msg_len += (int32_t)iov.iov_len; \
    _mongoc_array_append_val(array, iov); \
    iov.iov_base = (void *)rpc->_name; \
    iov.iov_len = rpc->_len * 8; \
-   BSON_ASSERT(iov.iov_len); \
+   assert (iov.iov_len); \
    rpc->msg_len += (int32_t)iov.iov_len; \
    _mongoc_array_append_val(array, iov);
 
@@ -133,7 +133,7 @@
    static void \
    _mongoc_rpc_swab_to_le_##_name (mongoc_rpc_##_name##_t *rpc) \
    { \
-      BSON_ASSERT(rpc); \
+      assert (rpc); \
       _code \
    }
 #define INT32_FIELD(_name) \
@@ -174,7 +174,7 @@
    static void \
    _mongoc_rpc_swab_from_le_##_name (mongoc_rpc_##_name##_t *rpc) \
    { \
-      BSON_ASSERT(rpc); \
+      assert (rpc); \
       _code \
    }
 #define INT64_ARRAY_FIELD(_len, _name) \
@@ -216,7 +216,7 @@
    static void \
    _mongoc_rpc_printf_##_name (mongoc_rpc_##_name##_t *rpc) \
    { \
-      BSON_ASSERT(rpc); \
+      assert (rpc); \
       _code \
    }
 #define INT32_FIELD(_name) \
@@ -319,9 +319,9 @@
                                 const uint8_t *buf, \
                                 size_t buflen) \
    { \
-      BSON_ASSERT(rpc); \
-      BSON_ASSERT(buf); \
-      BSON_ASSERT(buflen); \
+      assert (rpc); \
+      assert (buf); \
+      assert (buflen); \
       _code \
       return true; \
    }
@@ -353,7 +353,7 @@
       if (needed > buflen) { \
          return false; \
       } \
-      rpc->_name = (void *)buf; \
+      rpc->_name = (int64_t*)buf; \
       buf += needed; \
       buflen -= needed; \
    } while (0);
@@ -440,9 +440,6 @@ void
 _mongoc_rpc_gather (mongoc_rpc_t   *rpc,
                     mongoc_array_t *array)
 {
-   bson_return_if_fail(rpc);
-   bson_return_if_fail(array);
-
    switch ((mongoc_opcode_t)rpc->header.opcode) {
    case MONGOC_OPCODE_REPLY:
       _mongoc_rpc_gather_reply(&rpc->reply, array);
@@ -463,7 +460,7 @@ _mongoc_rpc_gather (mongoc_rpc_t   *rpc,
       _mongoc_rpc_gather_get_more(&rpc->get_more, array);
       return;
    case MONGOC_OPCODE_DELETE:
-      _mongoc_rpc_gather_delete(&rpc->delete, array);
+      _mongoc_rpc_gather_delete(&rpc->delete_, array);
       return;
    case MONGOC_OPCODE_KILL_CURSORS:
       _mongoc_rpc_gather_kill_cursors(&rpc->kill_cursors, array);
@@ -480,8 +477,6 @@ _mongoc_rpc_swab_to_le (mongoc_rpc_t *rpc)
 {
 #if BSON_BYTE_ORDER != BSON_LITTLE_ENDIAN
    mongoc_opcode_t opcode;
-
-   bson_return_if_fail(rpc);
 
    opcode = rpc->header.opcode;
 
@@ -505,7 +500,7 @@ _mongoc_rpc_swab_to_le (mongoc_rpc_t *rpc)
       _mongoc_rpc_swab_to_le_get_more(&rpc->get_more);
       break;
    case MONGOC_OPCODE_DELETE:
-      _mongoc_rpc_swab_to_le_delete(&rpc->delete);
+      _mongoc_rpc_swab_to_le_delete(&rpc->delete_);
       break;
    case MONGOC_OPCODE_KILL_CURSORS:
       _mongoc_rpc_swab_to_le_kill_cursors(&rpc->kill_cursors);
@@ -523,8 +518,6 @@ _mongoc_rpc_swab_from_le (mongoc_rpc_t *rpc)
 {
 #if BSON_BYTE_ORDER != BSON_LITTLE_ENDIAN
    mongoc_opcode_t opcode;
-
-   bson_return_if_fail(rpc);
 
    opcode = BSON_UINT32_FROM_LE(rpc->header.opcode);
 
@@ -548,7 +541,7 @@ _mongoc_rpc_swab_from_le (mongoc_rpc_t *rpc)
       _mongoc_rpc_swab_from_le_get_more(&rpc->get_more);
       break;
    case MONGOC_OPCODE_DELETE:
-      _mongoc_rpc_swab_from_le_delete(&rpc->delete);
+      _mongoc_rpc_swab_from_le_delete(&rpc->delete_);
       break;
    case MONGOC_OPCODE_KILL_CURSORS:
       _mongoc_rpc_swab_from_le_kill_cursors(&rpc->kill_cursors);
@@ -564,8 +557,6 @@ _mongoc_rpc_swab_from_le (mongoc_rpc_t *rpc)
 void
 _mongoc_rpc_printf (mongoc_rpc_t *rpc)
 {
-   bson_return_if_fail(rpc);
-
    switch ((mongoc_opcode_t)rpc->header.opcode) {
    case MONGOC_OPCODE_REPLY:
       _mongoc_rpc_printf_reply(&rpc->reply);
@@ -586,7 +577,7 @@ _mongoc_rpc_printf (mongoc_rpc_t *rpc)
       _mongoc_rpc_printf_get_more(&rpc->get_more);
       break;
    case MONGOC_OPCODE_DELETE:
-      _mongoc_rpc_printf_delete(&rpc->delete);
+      _mongoc_rpc_printf_delete(&rpc->delete_);
       break;
    case MONGOC_OPCODE_KILL_CURSORS:
       _mongoc_rpc_printf_kill_cursors(&rpc->kill_cursors);
@@ -605,10 +596,6 @@ _mongoc_rpc_scatter (mongoc_rpc_t  *rpc,
 {
    mongoc_opcode_t opcode;
 
-   bson_return_val_if_fail(rpc, false);
-   bson_return_val_if_fail(buf, false);
-   bson_return_val_if_fail(buflen, false);
-
    memset (rpc, 0, sizeof *rpc);
 
    if (BSON_UNLIKELY(buflen < 16)) {
@@ -619,7 +606,7 @@ _mongoc_rpc_scatter (mongoc_rpc_t  *rpc,
       return false;
    }
 
-   opcode = BSON_UINT32_FROM_LE(rpc->header.opcode);
+   opcode = (mongoc_opcode_t)BSON_UINT32_FROM_LE(rpc->header.opcode);
 
    switch (opcode) {
    case MONGOC_OPCODE_REPLY:
@@ -635,7 +622,7 @@ _mongoc_rpc_scatter (mongoc_rpc_t  *rpc,
    case MONGOC_OPCODE_GET_MORE:
       return _mongoc_rpc_scatter_get_more(&rpc->get_more, buf, buflen);
    case MONGOC_OPCODE_DELETE:
-      return _mongoc_rpc_scatter_delete(&rpc->delete, buf, buflen);
+      return _mongoc_rpc_scatter_delete(&rpc->delete_, buf, buflen);
    case MONGOC_OPCODE_KILL_CURSORS:
       return _mongoc_rpc_scatter_kill_cursors(&rpc->kill_cursors, buf, buflen);
    default:
@@ -650,9 +637,6 @@ _mongoc_rpc_reply_get_first (mongoc_rpc_reply_t *reply,
                              bson_t             *bson)
 {
    int32_t len;
-
-   bson_return_val_if_fail(reply, false);
-   bson_return_val_if_fail(bson, false);
 
    if (!reply->documents || reply->documents_len < 4) {
       return false;
@@ -692,8 +676,6 @@ bool
 _mongoc_rpc_needs_gle (mongoc_rpc_t                 *rpc,
                        const mongoc_write_concern_t *write_concern)
 {
-   bson_return_val_if_fail(rpc, false);
-
    switch (rpc->header.opcode) {
    case MONGOC_OPCODE_REPLY:
    case MONGOC_OPCODE_QUERY:
@@ -713,4 +695,159 @@ _mongoc_rpc_needs_gle (mongoc_rpc_t                 *rpc,
    }
 
    return true;
+}
+
+
+/* TODO: refactor with mongoc_cursor_error */
+static void
+_mongoc_populate_error (const bson_t *doc,
+                        bool          is_command,
+                        bson_error_t *error)
+{
+   uint32_t code = MONGOC_ERROR_QUERY_FAILURE;
+   bson_iter_t iter;
+   const char *msg = "Unknown query failure";
+
+   BSON_ASSERT (doc);
+
+   if (!error) {
+      return;
+   }
+
+   if (bson_iter_init_find (&iter, doc, "code") &&
+       BSON_ITER_HOLDS_INT32 (&iter)) {
+      code = (uint32_t) bson_iter_int32 (&iter);
+   }
+
+   if (is_command &&
+       ((code == MONGOC_ERROR_PROTOCOL_ERROR) ||
+        (code == 13390))) {
+      code = MONGOC_ERROR_QUERY_COMMAND_NOT_FOUND;
+   }
+
+   if (bson_iter_init_find (&iter, doc, "$err") &&
+       BSON_ITER_HOLDS_UTF8 (&iter)) {
+      msg = bson_iter_utf8 (&iter, NULL);
+   }
+
+   if (is_command &&
+       bson_iter_init_find (&iter, doc, "errmsg") &&
+       BSON_ITER_HOLDS_UTF8 (&iter)) {
+      msg = bson_iter_utf8 (&iter, NULL);
+   }
+
+   bson_set_error(error, MONGOC_ERROR_QUERY, code, "%s", msg);
+}
+
+
+static bool
+_mongoc_rpc_parse_error (mongoc_rpc_t *rpc,
+                         bool is_command,
+                         bson_error_t *error /* OUT */)
+{
+   bson_iter_t iter;
+   bson_t b;
+
+   ENTRY;
+
+   BSON_ASSERT (rpc);
+
+   if (rpc->header.opcode != MONGOC_OPCODE_REPLY) {
+      bson_set_error(error,
+                     MONGOC_ERROR_PROTOCOL,
+                     MONGOC_ERROR_PROTOCOL_INVALID_REPLY,
+                     "Received rpc other than OP_REPLY.");
+      RETURN(true);
+   }
+
+   if ((rpc->reply.flags & MONGOC_REPLY_QUERY_FAILURE)) {
+      if (_mongoc_rpc_reply_get_first(&rpc->reply, &b)) {
+         _mongoc_populate_error (&b, is_command, error);
+         bson_destroy(&b);
+      } else {
+         bson_set_error(error,
+                        MONGOC_ERROR_QUERY,
+                        MONGOC_ERROR_QUERY_FAILURE,
+                        "Unknown query failure.");
+      }
+      RETURN(true);
+   } else if (is_command) {
+      if (_mongoc_rpc_reply_get_first (&rpc->reply, &b)) {
+         if (bson_iter_init_find (&iter, &b, "ok")) {
+            if (bson_iter_as_bool (&iter)) {
+               RETURN (false);
+            } else {
+               _mongoc_populate_error (&b, is_command, error);
+               bson_destroy (&b);
+               RETURN (true);
+            }
+         }
+      } else {
+         bson_set_error (error,
+                         MONGOC_ERROR_BSON,
+                         MONGOC_ERROR_BSON_INVALID,
+                         "Failed to decode document from the server.");
+         RETURN (true);
+      }
+   }
+
+   if ((rpc->reply.flags & MONGOC_REPLY_CURSOR_NOT_FOUND)) {
+      bson_set_error(error,
+                     MONGOC_ERROR_CURSOR,
+                     MONGOC_ERROR_CURSOR_INVALID_CURSOR,
+                     "The cursor is invalid or has expired.");
+      RETURN(true);
+   }
+
+   RETURN(false);
+}
+
+
+/*
+ *--------------------------------------------------------------------------
+ *
+ * _mongoc_rpc_parse_command_error --
+ *
+ *       Check if a server OP_REPLY is a command error message.
+ *       Optionally fill out a bson_error_t from the server error.
+ *
+ * Returns:
+ *       true if the reply is an error message, false otherwise.
+ *
+ * Side effects:
+ *       If rpc is an error reply and @error is not NULL, set its
+ *       domain, code, and message.
+ *
+ *--------------------------------------------------------------------------
+ */
+
+bool _mongoc_rpc_parse_command_error (mongoc_rpc_t *rpc,
+                                      bson_error_t *error)
+{
+   return _mongoc_rpc_parse_error (rpc, true, error);
+}
+
+
+/*
+ *--------------------------------------------------------------------------
+ *
+ * _mongoc_rpc_parse_query_error --
+ *
+ *       Check if a server OP_REPLY is a query error message.
+ *       Optionally fill out a bson_error_t from the server error.
+ *
+ * Returns:
+ *       true if the reply is an error message, false otherwise.
+ *
+ * Side effects:
+ *       If rpc is an error reply and @error is not NULL, set its
+ *       domain, code, and message.
+ *
+ *--------------------------------------------------------------------------
+ */
+
+bool _mongoc_rpc_parse_query_error (mongoc_rpc_t *rpc,
+                                    bson_error_t *error)
+{
+   return _mongoc_rpc_parse_error (rpc, false, error);
 }

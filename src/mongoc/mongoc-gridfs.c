@@ -113,7 +113,7 @@ _mongoc_gridfs_new (mongoc_client_t *client,
    }
 #endif
 
-   gridfs = bson_malloc0 (sizeof *gridfs);
+   gridfs = (mongoc_gridfs_t *) bson_malloc0 (sizeof *gridfs);
 
    gridfs->client = client;
 
@@ -125,7 +125,10 @@ _mongoc_gridfs_new (mongoc_client_t *client,
 
    r = _mongoc_gridfs_ensure_index (gridfs, error);
 
-   if (!r) { return NULL; }
+   if (!r) {
+      mongoc_gridfs_destroy (gridfs);
+      RETURN (NULL);
+   }
 
    RETURN (gridfs);
 }
@@ -263,7 +266,7 @@ mongoc_gridfs_create_file_from_stream (mongoc_gridfs_t          *gridfs,
       }
    }
 
-   mongoc_stream_destroy (stream);
+   mongoc_stream_failed (stream);
 
    mongoc_gridfs_file_seek (file, 0, SEEK_SET);
 
@@ -280,7 +283,7 @@ mongoc_gridfs_create_file (mongoc_gridfs_t          *gridfs,
 
    ENTRY;
 
-   bson_return_val_if_fail (gridfs, NULL);
+   BSON_ASSERT (gridfs);
 
    file = _mongoc_gridfs_file_new (gridfs, opt);
 
@@ -291,7 +294,7 @@ mongoc_gridfs_create_file (mongoc_gridfs_t          *gridfs,
 mongoc_collection_t *
 mongoc_gridfs_get_files (mongoc_gridfs_t *gridfs)
 {
-   bson_return_val_if_fail (gridfs, NULL);
+   BSON_ASSERT (gridfs);
 
    return gridfs->files;
 }
@@ -299,7 +302,7 @@ mongoc_gridfs_get_files (mongoc_gridfs_t *gridfs)
 mongoc_collection_t *
 mongoc_gridfs_get_chunks (mongoc_gridfs_t *gridfs)
 {
-   bson_return_val_if_fail (gridfs, NULL);
+   BSON_ASSERT (gridfs);
 
    return gridfs->chunks;
 }
@@ -329,7 +332,7 @@ mongoc_gridfs_remove_by_filename (mongoc_gridfs_t *gridfs,
    bson_t fields = BSON_INITIALIZER;
    bson_t ar = BSON_INITIALIZER;
 
-   bson_return_val_if_fail (gridfs, false);
+   BSON_ASSERT (gridfs);
 
    if (!filename) {
       bson_set_error (error,
