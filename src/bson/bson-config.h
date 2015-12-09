@@ -3,9 +3,9 @@
 
 /* stuff for solaris */
 #if (defined(__sun) && defined(__SVR4))
-#define BSON_PTHREAD_ONCE_INIT_NEEDS_BRACES 1
+#define BSON_HAVE_STRNLEN 0
 #define BSON_HAVE_ATOMIC_32_ADD_AND_FETCH 0
-#define BSON_HAVE_ATOMIC_32_ADD_AND_FETCH 0
+#define BSON_HAVE_ATOMIC_64_ADD_AND_FETCH 0
 /* sparc is big endian */
 #include <sys/byteorder.h>
 #ifdef _BIG_ENDIAN
@@ -16,9 +16,9 @@
 #else
 /* for everyone else */
 #define BSON_BYTE_ORDER 1234
-#define BSON_PTHREAD_ONCE_INIT_NEEDS_BRACES 0
+#define BSON_HAVE_STRNLEN 1
 #define BSON_HAVE_ATOMIC_32_ADD_AND_FETCH 1
-#define BSON_HAVE_ATOMIC_32_ADD_AND_FETCH 1
+#define BSON_HAVE_ATOMIC_64_ADD_AND_FETCH 1
 #endif
 
 /*
@@ -62,6 +62,7 @@
  * Define to 1 if your system requires {} around PTHREAD_ONCE_INIT.
  * This is typically just Solaris 8-10.
  */
+#define BSON_PTHREAD_ONCE_INIT_NEEDS_BRACES 0
 #if BSON_PTHREAD_ONCE_INIT_NEEDS_BRACES != 1
 # undef BSON_PTHREAD_ONCE_INIT_NEEDS_BRACES
 #endif
@@ -78,7 +79,6 @@
 /*
  * Define to 1 if you have strnlen available on your platform.
  */
-#define BSON_HAVE_STRNLEN 1
 #if BSON_HAVE_STRNLEN != 1
 # undef BSON_HAVE_STRNLEN
 #endif
@@ -91,6 +91,33 @@
 #if BSON_HAVE_SNPRINTF != 1
 # undef BSON_HAVE_SNPRINTF
 #endif
+
+
+/*
+* Define to 1 if you have _set_output_format (VS2013 and older).
+*/
+#define BSON_NEEDS_SET_OUTPUT_FORMAT 0
+#if BSON_NEEDS_SET_OUTPUT_FORMAT != 1
+# undef BSON_NEEDS_SET_OUTPUT_FORMAT
+#endif
+
+/*
+* Define to 1 if you have struct timespec available on your platform.
+*/
+#define BSON_HAVE_TIMESPEC 1
+#if BSON_HAVE_TIMESPEC != 1
+# undef BSON_HAVE_TIMESPEC
+#endif
+
+
+/*
+* Define to 1 if you want extra aligned types in libbson
+* Moved to this in Makevars because it doesn't work well with mingw
+* #if BSON_EXTRA_ALIGN != 1
+* # undef BSON_EXTRA_ALIGN
+* #endif
+*/
+
 
 
 #endif /* BSON_CONFIG_H */

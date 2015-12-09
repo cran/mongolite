@@ -1,8 +1,10 @@
 #' MongoDB client
 #'
-#' Connect to a MongoDB collection.
+#' Connect to a MongoDB collection. Returns a \code{mongo} connection object with
+#' methods listed below.
 #'
 #' @export
+#' @aliases mongolite
 #' @param url address of the mongodb server in mongo connection string
 #' \href{http://docs.mongodb.org/manual/reference/connection-string/}{URI format}.
 #' @param db name of database
@@ -10,7 +12,22 @@
 #' @param verbose emit some more output
 #' @return Upon success returns a pointer to a collection on the server.
 #' The collection can be interfaced using the methods described below.
-#' @examples \dontrun{
+#' @examples # Connect to mongolabs
+#' con <- mongo("mtcars", url = "mongodb://readwrite:test@ds043942.mongolab.com:43942/jeroen_test")
+#' if(con$count() > 0) con$drop()
+#' con$insert(mtcars)
+#' stopifnot(con$count() == nrow(mtcars))
+#'
+#' # Query data
+#' mydata <- con$find()
+#' stopifnot(all.equal(mydata, mtcars))
+#' con$drop()
+#'
+#' # Automatically disconnect when connection is removed
+#' rm(con)
+#' gc()
+#'
+#' \dontrun{
 #' # dplyr example
 #' library(nycflights13)
 #'
@@ -56,7 +73,7 @@
 #'
 #' # Import from jsonlines stream from connection
 #' dmd <- mongo("diamonds")
-#' dmd$import(url("http://jeroenooms.github.io/data/diamonds.json))
+#' dmd$import(url("http://jeroenooms.github.io/data/diamonds.json"))
 #' dmd$count()
 #'
 #' # Export

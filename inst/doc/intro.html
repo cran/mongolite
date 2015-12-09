@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2015-10-31" />
+<meta name="date" content="2015-12-09" />
 
 <title>Getting started with MongoDB in R</title>
 
@@ -62,7 +62,7 @@ img {
 
 <div id="header">
 <h1 class="title">Getting started with MongoDB in R</h1>
-<h4 class="date"><em>2015-10-31</em></h4>
+<h4 class="date"><em>2015-12-09</em></h4>
 </div>
 
 
@@ -171,23 +171,24 @@ m$count()</code></pre>
 library(mongolite)
 
 # Stream from url into mongo
-m &lt;- mongo(&quot;zips&quot;)
+m &lt;- mongo(&quot;zips&quot;, verbose = FALSE)
 stream_in(url(&quot;http://media.mongodb.org/zips.json&quot;), handler = function(df){
-  m$insert(df, verbose = FALSE)
+  m$insert(df)
 })
 
 # Check count
 m$count()
 
 # Import. Note the 'location' column is actually an array!
-zips &lt;- m$find()</code></pre>
+zips &lt;- m$find()
+m$drop()</code></pre>
 </div>
 <div id="nested-data" class="section level2">
 <h2>Nested data</h2>
 <p>Stream large bulk samples from <a href="http://openweathermap.org/current#bulk">openweathermap</a> with deeply nested data (takes a while).</p>
-<pre class="r"><code>m &lt;- mongo(&quot;weather&quot;)
+<pre class="r"><code>m &lt;- mongo(&quot;weather&quot;, verbose = FALSE)
 stream_in(gzcon(url(&quot;http://78.46.48.103/sample/daily_14.json.gz&quot;)), handler = function(df){
-  m$insert(df, verbose = FALSE)  
+  m$insert(df)  
 }, pagesize = 50)
 
 berlin &lt;- m$find('{&quot;city.name&quot; : &quot;Berlin&quot;}')

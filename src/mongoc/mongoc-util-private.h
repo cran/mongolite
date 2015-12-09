@@ -44,7 +44,12 @@ char *_mongoc_hex_md5 (const char *input);
 
 void _mongoc_usleep (int64_t usec);
 
+const char *_mongoc_get_command_name (const bson_t *command);
 
+void _mongoc_get_db_name (const char *ns,
+                          char *db /* OUT */);
+
+void _mongoc_bson_destroy_if_set (bson_t *bson);
 BSON_END_DECLS
 
 
