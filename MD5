@@ -1,6 +1,6 @@
-8edcaa41993af2315e35f04866d236c5 *DESCRIPTION
+8af8590feee0379958273e7a365c613e *DESCRIPTION
 4f86db127217158548d4fe73985479bb *NAMESPACE
-29fa452736be30f85f56afb28199559e *NEWS
+0c460dd35142b2a5ea13b28ab66c65b6 *NEWS
 5f648f3b73fb72ea9e4d781b5a9b20cb *R/bson.R
 c8f67e5fec497410cd1472b9033b8490 *R/hacks.R
 3c68436e9a64e318c069bc4523a88eb9 *R/iter.R
@@ -8,12 +8,12 @@ c8f67e5fec497410cd1472b9033b8490 *R/hacks.R
 a9cdc0985538ec09a1d355caa3d5dc73 *R/mongo.R
 4270bcd3bcf79382dcc613ec7243bedd *R/object.R
 379c693864d87d5b5fcb29980ed13a30 *R/stream.R
-e9ec4eaa80f93c490e971e8e8c9e4ce4 *build/vignette.rds
+e268e0bed1dddd4d4b60308ef3d9cddd *build/vignette.rds
 f51472e1acac509fdea98e9106d8bb57 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 622e27c14fd6ba4e6dba7258d51f4475 *inst/CITATION
-91c75c68cecc92a76dfef41ccac27566 *inst/doc/intro.Rmd
-681d23baf1e1aa325a3f98b302383752 *inst/doc/intro.html
+2e75b1bf0b94778463737c4c1cf26555 *inst/doc/intro.Rmd
+800992383cf239b468c42f2d8b7eceb7 *inst/doc/intro.html
 0722b6a12014f6a3b8223d2c1d56e21e *man/mongo.Rd
 d758e8dce295bc47f672dbb0c2e9b141 *src/Makevars.in
 e32a7a7ae1ded947bdfaee79fc38ba47 *src/Makevars.win
@@ -28,7 +28,7 @@ a2f2ae100db5d6602c323b9993305893 *src/bson/bson-atomic.h
 e005ee43ff5516ada7a8afb103310f5c *src/bson/bson-clock.c
 c0e771385f32369c59ba3de570b854c9 *src/bson/bson-clock.h
 8f76e2f45df2644215e0969e947d9a87 *src/bson/bson-compat.h
-36ccb927ee1d8d4baf442ca33e2bd92b *src/bson/bson-config.h
+a205bfa56e270b21a024918929fbbcad *src/bson/bson-config.h
 11177a64ea0d8136b73312d0e9313dae *src/bson/bson-context-private.h
 26bbea92a38eb020f99c31006fe8e1cc *src/bson/bson-context.c
 bc4ed2208b0f062619391e27c35b3716 *src/bson/bson-context.h
@@ -39,7 +39,7 @@ be7c0192246dad6a30b0f3835380c343 *src/bson/bson-iso8601-private.h
 bcbaf2a59bc63350978d2be3401118bb *src/bson/bson-iso8601.c
 1822df11997a072bac645885340bc3a1 *src/bson/bson-iter.c
 9820ad956c26006311cb6d3a5ab6bf37 *src/bson/bson-iter.h
-64a34f827f7c44628fbb506bf1acd5a9 *src/bson/bson-json.c
+ed2d17d49d387f587840af4fa8a237ac *src/bson/bson-json.c
 53a9cbbe5c9a58fc4790c1e995e2db29 *src/bson/bson-json.h
 30bfe359c194f01ffbf1afe053c4f16c *src/bson/bson-keys.c
 360489fa7642c546ad50ccacf6fa7b7d *src/bson/bson-keys.h
@@ -54,8 +54,8 @@ b6516065288b9d39daec78b83111601d *src/bson/bson-memory.c
 4d876db12b4b19f17ffcafc1b6488861 *src/bson/bson-reader.c
 fa9d0dcbb77842c38f75deba2531b154 *src/bson/bson-reader.h
 d4277ba8b3bc0f7753931062eb0cd5eb *src/bson/bson-stdint-win32.h
-c69b0bcc37a4996cf184ce4c1d2056ef *src/bson/bson-stdint.h
-a7788d3609226e42b353afe418bbf1e5 *src/bson/bson-string.c
+9d4fe50736a861f843471f9f81fa0cdd *src/bson/bson-stdint.h
+426c704e288104d8dd87cbbbeca9aa51 *src/bson/bson-string.c
 4ecbd4e7bf09ede19374cd87d4155164 *src/bson/bson-string.h
 2a16019c51864483f27676c83e12b293 *src/bson/bson-thread-private.h
 bbe5863f79868d0a153f9eb591f09f20 *src/bson/bson-timegm-private.h
@@ -67,7 +67,7 @@ ee95977dddde8a36cf53007dfd221c49 *src/bson/bson-value.c
 34889442e7c5e4c54c3c60b2e0f77ebd *src/bson/bson-value.h
 f80a6f4a82a8c86f63eaccc1c8d147ee *src/bson/bson-version-functions.c
 b60ecb89018a8fa6ca6d16fd089ce952 *src/bson/bson-version-functions.h
-58967ac901844c00c344076cbbb55647 *src/bson/bson-version.h
+e5fab6bf65e7c708b26d86eb64888e99 *src/bson/bson-version.h
 8108f0a5dd05650f53c3c2eca95d587c *src/bson/bson-writer.c
 0aea55fb0deab9311812eefc9a0291d5 *src/bson/bson-writer.h
 a964beb80a921c5a2cfbaf4ce445ec40 *src/bson/bson.c
@@ -110,7 +110,7 @@ ead7a19ab678217ac91ce4fd6aae9469 *src/mongoc/mongoc-collection.h
 6daaa062ea92e1aca670090312da9c6a *src/mongoc/mongoc-cursor-private.h
 9cbe4f04279d1d3c6e1c6c3b878c9e11 *src/mongoc/mongoc-cursor-transform-private.h
 2700b1f603ffb52c0e22d04f437f983e *src/mongoc/mongoc-cursor-transform.c
-46baf584d2a6bf75d714f76505656bac *src/mongoc/mongoc-cursor.c
+da3b36c2193e98d6f06774fc2f4f19a1 *src/mongoc/mongoc-cursor.c
 6616bbe8a95bc5beb53a5207d431a0d5 *src/mongoc/mongoc-cursor.h
 2807a008970f8b2078537c076751e438 *src/mongoc/mongoc-database-private.h
 49437d60fc7251d2d091c53a819be09b *src/mongoc/mongoc-database.c
@@ -131,7 +131,7 @@ bd1c523d758a24e137e3ab9073e22664 *src/mongoc/mongoc-gridfs-file-page.h
 d273b88f79206c1c85a455535d506023 *src/mongoc/mongoc-gridfs-file.c
 00b70108474e3a3cff6ecc11e8b36b85 *src/mongoc/mongoc-gridfs-file.h
 5b58027f4adfe99b4dd02d74845674e6 *src/mongoc/mongoc-gridfs-private.h
-930934eb967184e220acb93ad1c01fff *src/mongoc/mongoc-gridfs.c
+8ffde8c91dfaaec31f0e28fd2f95f272 *src/mongoc/mongoc-gridfs.c
 0411f5526c8bdc64ce67b45037d9c402 *src/mongoc/mongoc-gridfs.h
 e85d3190970eceda6bd30794e19f6320 *src/mongoc/mongoc-host-list-private.h
 5ad5435d0cdb0637089e0825fb41a58c *src/mongoc/mongoc-host-list.c
@@ -173,8 +173,8 @@ d4dce2c0eae43640d837886d6859d731 *src/mongoc/mongoc-sasl-private.h
 b7f4ba6d5da7444f0a1f756580537c5f *src/mongoc/mongoc-sasl.c
 316a128390a4effb8679c93001d5a81f *src/mongoc/mongoc-scram-private.h
 faef7ecc6c5aef6af46a5220f6c8af11 *src/mongoc/mongoc-scram.c
-67535ce6208d29b462896a7f11311047 *src/mongoc/mongoc-server-description-private.h
-35f280153974006eedc4eab5acceb347 *src/mongoc/mongoc-server-description.c
+bcff14cf8a4c1be42c0ee252cee0b7f9 *src/mongoc/mongoc-server-description-private.h
+f1d29fa2e8e830f70e47b7ee6d7ef484 *src/mongoc/mongoc-server-description.c
 e890f31a55697373a0fe78779d6f6a1b *src/mongoc/mongoc-server-description.h
 17072d626c8bbbc5e615b21c1894cabb *src/mongoc/mongoc-server-stream-private.h
 5b76c5cc9b2d6bb56d929770e8c370bf *src/mongoc/mongoc-server-stream.c
@@ -200,8 +200,8 @@ ecfed477b8d8a69d3710ae5d66710b38 *src/mongoc/mongoc-stream-tls.c
 66e46835120b2df99c7b0db2387dd6c3 *src/mongoc/mongoc-stream.c
 40bdf55f52281c74e6c9c1a876e77637 *src/mongoc/mongoc-stream.h
 b7420c8161037d2990282f9599c5c66e *src/mongoc/mongoc-thread-private.h
-1552518974e45e7e1b75745457701d70 *src/mongoc/mongoc-topology-description-private.h
-cf9d8f42c3723870c3f479c052aaaa27 *src/mongoc/mongoc-topology-description.c
+3f6530302f233d487a44c8ce3dc45a0c *src/mongoc/mongoc-topology-description-private.h
+f8401a63ff80140174be13ef996d9894 *src/mongoc/mongoc-topology-description.c
 70c41e9792dc744332b22762ba593d35 *src/mongoc/mongoc-topology-private.h
 fa0c4c686d95e29b97f39db6e88a3c44 *src/mongoc/mongoc-topology-scanner-private.h
 9e451ba52b688873042abca83cbb3200 *src/mongoc/mongoc-topology-scanner.c
@@ -214,7 +214,7 @@ f2d7142c7e850f3f242154e729ab07eb *src/mongoc/mongoc-uri-private.h
 94bd0076ee62643a3f82faff1e2c1f5f *src/mongoc/mongoc-util.c
 e699d508bdb2d3f5220bbc5bf413bae1 *src/mongoc/mongoc-version-functions.c
 13165cf1b16ef34ec8d72cb980705477 *src/mongoc/mongoc-version-functions.h
-524393b35fd82cd7d73b3ee0fe0b76eb *src/mongoc/mongoc-version.h
+1ed39a7c3519c443f9b8f5844cdc4ad3 *src/mongoc/mongoc-version.h
 445de5fdc0a96238c91dcb0ed0066aa3 *src/mongoc/mongoc-write-command-private.h
 e49314c311a879b20ccdd02270bd56de *src/mongoc/mongoc-write-command.c
 a85e113e3ebedb5db35c3d34ab7e7453 *src/mongoc/mongoc-write-concern-private.h
@@ -260,4 +260,4 @@ a0ee19c679c295449de6bbdae05ef82d *src/yajl/yajl_tree.c
 7f5386e92966acaf68a6f6f6281c1d8b *tests/testthat/test-diamonds.R
 010abe19056ee6217b339c23a3e6bef6 *tests/testthat/test-flights.R
 4d5e4eec1296e35111b358bab6edcfb4 *tools/winlibs.R
-91c75c68cecc92a76dfef41ccac27566 *vignettes/intro.Rmd
+2e75b1bf0b94778463737c4c1cf26555 *vignettes/intro.Rmd
