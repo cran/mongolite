@@ -5,7 +5,7 @@ Description: High-level, high-performance MongoDB client based on libmongoc and
     jsonlite. Includes support for aggregation, indexing, map-reduce, streaming,
     SSL encryption and SASL authentication. The vignette gives a brief overview
     of the available methods in the package.
-Version: 0.8
+Version: 0.8.1
 Authors@R: c(
     person("Jeroen", "Ooms", ,"jeroen.ooms@stat.ucla.edu", role = c("aut", "cre")),
     person("MongoDB, Inc", role = "cph", comment = "Author of mongo-c-driver")
@@ -21,8 +21,8 @@ Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
 NeedsCompilation: yes
-Packaged: 2016-01-23 22:35:40 UTC; jeroen
+Packaged: 2016-03-21 12:01:01 UTC; jeroen
 Author: Jeroen Ooms [aut, cre],
   MongoDB, Inc [cph] (Author of mongo-c-driver)
 Repository: CRAN
-Date/Publication: 2016-01-23 23:58:40
+Date/Publication: 2016-03-21 23:08:24
