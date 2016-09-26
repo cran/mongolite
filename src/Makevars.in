@@ -1,5 +1,5 @@
-PKG_CPPFLAGS=-I. -Iyajl -Ibson -Imongoc @cflags@ -DBSON_COMPILATION -DMONGOC_COMPILATION \
-  -DBSON_EXTRA_ALIGN
+PKG_CPPFLAGS=-I. -Iyajl -Ibson -Imongoc -DBSON_COMPILATION -DMONGOC_COMPILATION \
+  @cflags@
 
 LIBYAJL=yajl/yajl_alloc.o yajl/yajl_buf.o yajl/yajl_encode.o yajl/yajl_gen.o \
 	yajl/yajl_lex.o yajl/yajl_parser.o yajl/yajl_tree.o yajl/yajl_version.o \
@@ -20,7 +20,7 @@ LIBMONGOC=mongoc/mongoc-array.o mongoc/mongoc-b64.o mongoc/mongoc-buffer.o \
 	mongoc/mongoc-gridfs-file.o mongoc/mongoc-gridfs.o mongoc/mongoc-index.o \
 	mongoc/mongoc-init.o mongoc/mongoc-list.o mongoc/mongoc-log.o \
 	mongoc/mongoc-matcher-op.o mongoc/mongoc-matcher.o mongoc/mongoc-queue.o \
-	mongoc/mongoc-rand.o mongoc/mongoc-read-prefs.o mongoc/mongoc-rpc.o \
+	mongoc/mongoc-rand-openssl.o mongoc/mongoc-read-prefs.o mongoc/mongoc-rpc.o \
 	mongoc/mongoc-sasl.o mongoc/mongoc-scram.o mongoc/mongoc-socket.o mongoc/mongoc-ssl.o \
 	mongoc/mongoc-stream-buffered.o mongoc/mongoc-stream-file.o \
 	mongoc/mongoc-stream-gridfs.o mongoc/mongoc-stream-socket.o mongoc/mongoc-stream-tls.o \
@@ -31,19 +31,17 @@ LIBMONGOC=mongoc/mongoc-array.o mongoc/mongoc-b64.o mongoc/mongoc-buffer.o \
 	mongoc/mongoc-server-description.o mongoc/mongoc-topology-description.o \
 	mongoc/mongoc-topology.o mongoc/mongoc-topology-scanner.o mongoc/mongoc-version-functions.o \
 	mongoc/mongoc-memcmp.o mongoc/mongoc-server-stream.o mongoc/mongoc-find-and-modify.o \
-	mongoc/mongoc-read-concern.o
+	mongoc/mongoc-read-concern.o mongoc/mongoc-openssl.o mongoc/mongoc-apm.o \
+	mongoc/mongoc-crypto.o mongoc/mongoc-crypto-openssl.o \
+	mongoc/mongoc-stream-tls-openssl.o mongoc/mongoc-stream-tls-openssl-bio.o
 
 PKG_LIBS=-L. -lmongoc -lbson -lyajl @libs@
 
-$(SHLIB): libyajl.a libbson.a libmongoc.a
-
 # For development only
-# PKG_CFLAGS= -Wall -pedantic
-# $(OBJECTS): clean
+#PKG_CFLAGS= -Wall -pedantic
+#all: clean
 
-clean:
-	rm -f $(LIBYAJL) $(LIBBSON) $(LIBMONGOC)
-	rm -f *.so *.o *.a
+$(SHLIB): libyajl.a libbson.a libmongoc.a
 
 libyajl.a: $(LIBYAJL)
 	$(AR) rcs libyajl.a $(LIBYAJL)
@@ -53,3 +51,7 @@ libbson.a: $(LIBBSON)
 
 libmongoc.a: $(LIBMONGOC)
 	$(AR) rcs libmongoc.a $(LIBMONGOC)
+
+clean:
+	rm -f $(LIBYAJL) $(LIBBSON) $(LIBMONGOC) $(SHLIB) $(OBJECTS)
+	rm -f libyajl.a libbson.a libmongoc.a

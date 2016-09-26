@@ -90,7 +90,7 @@
 #'   \item{\code{import(con, bson = FALSE)}}{Stream import data in \href{http://ndjson.org}{jsonlines} format from a \code{\link{connection}}, similar to the \href{http://docs.mongodb.org/v2.6/reference/mongoimport/}{mongoimport} utility. Alternatively when \code{bson = TRUE} it assumes the binary \href{http://bsonspec.org/faq.html}{bson} format (similar to \href{http://docs.mongodb.org/manual/reference/program/mongorestore/}{mongorestore}).}
 #'   \item{\code{index(add = NULL, remove = NULL)}}{List, add, or remove indexes from the collection. The \code{add} and \code{remove} arguments can either be a field name or json object. Returns a dataframe with current indexes.}
 #'   \item{\code{info()}}{Returns collection statistics and server info (if available).}
-#'   \item{\code{insert(data, pagesize = 1000)}}{Insert a dataframe into the collection.}
+#'   \item{\code{insert(data, pagesize = 1000, ...)}}{Insert rows into the collection. Argument 'data' must be a data-frame, named list (for single record) or character vector with json strings (one string for each row). For lists and data frames, arguments in \code{...} get passed to \code{\link[jsonlite:toJSON]{jsonlite::toJSON}}}
 #'   \item{\code{iterate(query = '{}', fields = '{"_id":0}', sort = '{}', skip = 0, limit = 0)}}{Runs query and returns iterator to read single records one-by-one.}
 #'   \item{\code{mapreduce(map, reduce, query = '{}', sort = '{}', limit = 0, out = NULL, scope = NULL)}}{Performs a map reduce query. The \code{map} and \code{reduce} arguments are strings containing a JavaScript function. Set \code{out} to a string to store results in a collection instead of returning.}
 #'   \item{\code{remove(query = "{}", multiple = FALSE)}}{Remove record(s) matching \code{query} from the collection.}
@@ -109,26 +109,63 @@ mongo <- function(collection = "test", db = "test", url = "mongodb://localhost",
 
   col <- mongo_collection_new(client, collection, db)
   mongo_collection_command_simple(col, '{"ping":1}')
-  mongo_object(col, client, verbose = verbose)
+  orig <- list(
+    name = tryCatch(mongo_collection_name(col), error = function(e){collection}),
+    db = db,
+    url = url
+  )
+  mongo_object(col, client, verbose = verbose, orig)
 }
 
-mongo_object <- function(col, client, verbose){
+mongo_object <- function(col, client, verbose, orig){
+  # Check if the ptr has died and automatically recreate it
+  check_col <- function(){
+    if(null_ptr(col)){
+      if(verbose)
+        message("Trying to reconnect with mongo...")
+      client <<- mongo_client_new(orig$url)
+      col <<- mongo_collection_new(client, orig$name, orig$db)
+    }
+  }
+
+  # The reference object
   self <- local({
-    insert <- function(data, pagesize = 1000)
-      mongo_stream_out(data, col, pagesize = pagesize, verbose = verbose)
+    insert <- function(data, pagesize = 1000, ...){
+      check_col()
+      if(is.data.frame(data)){
+        mongo_stream_out(data, col, pagesize = pagesize, verbose = verbose, ...)
+      } else if(is.list(data) && !is.null(names(data))){
+        mongo_collection_insert_page(col, jsonlite::toJSON(data, ...))
+      } else if(is.character(data)) {
+        if(!all(is_valid <- vapply(data, jsonlite::validate, logical(1), USE.NAMES = FALSE))){
+          el <- paste(which(!is_valid), collapse = ", ")
+          stop("Argument 'data' is a character vector but contains invalid JSON at elements: ", el)
+        }
+        if(!all(is_valid <- grepl("^\\s*\\{", data))){
+          el <- paste(which(!is_valid), collapse = ", ")
+          stop("Argument 'data' contains strings that are not JSON objects at elements: ", el)
+        }
+         mongo_collection_insert_page(col, data)
+      } else {
+        stop("Argument 'data' must be a data frame, named list, or character vector with json strings")
+      }
+    }
 
     find <- function(query = '{}', fields = '{"_id":0}', sort = '{}', skip = 0, limit = 0, handler = NULL, pagesize = 1000){
+      check_col()
       cur <- mongo_collection_find(col, query = query, sort = sort, fields = fields, skip = skip, limit = limit)
       mongo_stream_in(cur, handler = handler, pagesize = pagesize, verbose = verbose)
     }
 
     iterate <- function(query = '{}', fields = '{"_id":0}', sort = '{}', skip = 0, limit = 0) {
+      check_col()
       cur <- mongo_collection_find(col, query = query, sort = sort, fields = fields, skip = skip, limit = limit)
       # make sure 'col' does not go out of scope to prevent gc
       mongo_iterator(cur, col)
     }
 
     export <- function(con = stdout(), bson = FALSE){
+      check_col()
       if(isTRUE(bson)){
         mongo_dump(col, con, verbose = verbose)
       } else {
@@ -137,6 +174,7 @@ mongo_object <- function(col, client, verbose){
     }
 
     import <- function(con, bson = FALSE){
+      check_col()
       if(isTRUE(bson)){
         mongo_restore(col, con, verbose = verbose)
       } else {
@@ -145,23 +183,33 @@ mongo_object <- function(col, client, verbose){
     }
 
     aggregate <- function(pipeline = '{}', handler = NULL, pagesize = 1000){
+      check_col()
       cur <- mongo_collection_aggregate(col, pipeline)
       mongo_stream_in(cur, handler = handler, pagesize = pagesize, verbose = verbose)
     }
 
-    count <- function(query = '{}')
+    count <- function(query = '{}'){
+      check_col()
       mongo_collection_count(col, query)
+    }
 
-    remove <- function(query, multiple = FALSE)
+    remove <- function(query, multiple = FALSE){
+      check_col()
       mongo_collection_remove(col, query, multiple)
+    }
 
-    drop <- function()
+    drop <- function(){
+      check_col()
       mongo_collection_drop(col)
+    }
 
-    update <- function(query, update = '{"$set":{}}', upsert = FALSE, multiple = FALSE)
+    update <- function(query, update = '{"$set":{}}', upsert = FALSE, multiple = FALSE){
+      check_col()
       mongo_collection_update(col, query, update, upsert, multiple)
+    }
 
     mapreduce <- function(map, reduce, query = '{}', sort = '{}', limit = 0, out = NULL, scope = NULL){
+      check_col()
       cur <- mongo_collection_mapreduce(col, map = map, reduce = reduce, query = query,
         sort = sort, limit = limit, out = out, scope = scope)
       results <- mongo_stream_in(cur, verbose = FALSE)
@@ -172,11 +220,13 @@ mongo_object <- function(col, client, verbose){
     }
 
     distinct <- function(key, query = '{}'){
+      check_col()
       out <- mongo_collection_distinct(col, key, query)
       jsonlite:::simplify(out$values)
     }
 
     info <- function(){
+      check_col()
       list(
         name = mongo_collection_name(col),
         stats = tryCatch(mongo_collection_stats(col), error = function(e) NULL),
@@ -184,10 +234,19 @@ mongo_object <- function(col, client, verbose){
       )
     }
 
-    rename <- function(name, db = NULL)
-      mongo_collection_rename(col, db, name)
+    rename <- function(name, db = NULL){
+      check_col()
+      out <- mongo_collection_rename(col, db, name)
+      orig <<- list(
+        name =  tryCatch(mongo_collection_name(col), error = function(e){name}),
+        db = ifelse(is.null(db), orig$db, db),
+        url = orig$url
+      )
+      orig
+    }
 
     index <- function(add = NULL, remove = NULL){
+      check_col()
       if(length(add))
         mongo_collection_create_index(col, add);
 
@@ -204,5 +263,17 @@ mongo_object <- function(col, client, verbose){
 
 #' @export
 print.mongo <- function(x, ...){
+  parent.env(x)$check_col()
   print.jeroen(x, title = paste0("<Mongo collection> '", mongo_collection_name(parent.env(x)$col), "'"))
 }
+
+
+#setGeneric("serialize")
+#setOldClass("jeroen")
+#setMethod("serialize", "jeroen", function(object, connection){
+#  if(!missing(connection)) {
+#    writeBin(bson_to_raw(object), connection)
+#  } else {
+#    bson_to_raw(object);
+#  }
+#});
