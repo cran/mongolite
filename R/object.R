@@ -10,6 +10,7 @@
 #' @param db name of database
 #' @param collection name of collection
 #' @param verbose emit some more output
+#' @param options additional connection options such as SSL keys/certs.
 #' @return Upon success returns a pointer to a collection on the server.
 #' The collection can be interfaced using the methods described below.
 #' @examples # Connect to mongolabs
@@ -98,12 +99,13 @@
 #'   \item{\code{update(query, update = '{"$set":{}}', upsert = FALSE, multiple = FALSE)}}{Replace or modify matching record(s) with value of the \code{update} argument.}
 #' }
 #' @references Jeroen Ooms (2014). The \code{jsonlite} Package: A Practical and Consistent Mapping Between JSON Data and \R{} Objects. \emph{arXiv:1403.2805}. \url{http://arxiv.org/abs/1403.2805}
-mongo <- function(collection = "test", db = "test", url = "mongodb://localhost", verbose = TRUE){
-  client <- mongo_client_new(url)
+mongo <- function(collection = "test", db = "test", url = "mongodb://localhost", verbose = TRUE, options = ssl_options()){
+  client <- do.call(mongo_client_new, c(list(uri = url), options))
 
   # workaround for missing 'mongoc_client_get_default_database'
   if(missing(db) || is.null(db)){
-    if(!is.null(url_db <- mongo_get_default_database(client)))
+    url_db <- mongo_get_default_database(client)
+    if(length(url_db) && nchar(url_db))
       db <- url_db
   }
 
@@ -112,8 +114,11 @@ mongo <- function(collection = "test", db = "test", url = "mongodb://localhost",
   orig <- list(
     name = tryCatch(mongo_collection_name(col), error = function(e){collection}),
     db = db,
-    url = url
+    url = url,
+    options = options
   )
+  if(length(options$pem_file) && file.exists(options$pem_file))
+    attr(orig, "pemdata") <- readLines(options$pem_file)
   mongo_object(col, client, verbose = verbose, orig)
 }
 
@@ -121,10 +126,16 @@ mongo_object <- function(col, client, verbose, orig){
   # Check if the ptr has died and automatically recreate it
   check_col <- function(){
     if(null_ptr(col)){
-      if(verbose)
-        message("Trying to reconnect with mongo...")
-      client <<- mongo_client_new(orig$url)
-      col <<- mongo_collection_new(client, orig$name, orig$db)
+      message("Connection lost. Trying to reconnect with mongo...")
+      if(length(orig$options$pem_file) && !file.exists(orig$options$pem_file)){
+        orig$options$pem_file <- tempfile()
+        writeLines(attr(orig, "pemdata"), orig$options$pem_file)
+      }
+      newclient <-  do.call(mongo_client_new, c(list(uri = orig$url), orig$options))
+      newcol <- mongo_collection_new(newclient, orig$name, orig$db)
+      mongo_collection_command_simple(newcol, '{"ping":1}')
+      client <<- newclient
+      col <<- newcol
     }
   }
 
@@ -182,9 +193,9 @@ mongo_object <- function(col, client, verbose, orig){
       }
     }
 
-    aggregate <- function(pipeline = '{}', handler = NULL, pagesize = 1000){
+    aggregate <- function(pipeline = '{}', options = '{"allowDiskUse":true}', handler = NULL, pagesize = 1000){
       check_col()
-      cur <- mongo_collection_aggregate(col, pipeline)
+      cur <- mongo_collection_aggregate(col, pipeline, options)
       mongo_stream_in(cur, handler = handler, pagesize = pagesize, verbose = verbose)
     }
 
