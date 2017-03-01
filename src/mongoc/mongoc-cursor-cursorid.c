@@ -19,7 +19,7 @@
 #include "mongoc-cursor-private.h"
 #include "mongoc-cursor-cursorid-private.h"
 #include "mongoc-log.h"
-#include "mongoc-trace.h"
+#include "mongoc-trace-private.h"
 #include "mongoc-error.h"
 #include "mongoc-util-private.h"
 #include "mongoc-client-private.h"
@@ -52,7 +52,7 @@ _mongoc_cursor_cursorid_destroy (mongoc_cursor_t *cursor)
 
    ENTRY;
 
-   cid = (mongoc_cursor_cursorid_t *)cursor->iface_data;
+   cid = (mongoc_cursor_cursorid_t *) cursor->iface_data;
    BSON_ASSERT (cid);
 
    bson_destroy (&cid->array);
@@ -77,13 +77,12 @@ _mongoc_cursor_cursorid_start_batch (mongoc_cursor_t *cursor)
    const char *ns;
    uint32_t nslen;
 
-   cid = (mongoc_cursor_cursorid_t *)cursor->iface_data;
+   cid = (mongoc_cursor_cursorid_t *) cursor->iface_data;
 
    BSON_ASSERT (cid);
 
    if (bson_iter_init_find (&iter, &cid->array, "cursor") &&
-       BSON_ITER_HOLDS_DOCUMENT (&iter) &&
-       bson_iter_recurse (&iter, &child)) {
+       BSON_ITER_HOLDS_DOCUMENT (&iter) && bson_iter_recurse (&iter, &child)) {
       while (bson_iter_next (&child)) {
          if (BSON_ITER_IS_KEY (&child, "id")) {
             cursor->rpc.reply.cursor_id = bson_iter_as_int64 (&child);
@@ -106,13 +105,13 @@ _mongoc_cursor_cursorid_start_batch (mongoc_cursor_t *cursor)
 
 static bool
 _mongoc_cursor_cursorid_refresh_from_command (mongoc_cursor_t *cursor,
-                                              const bson_t    *command)
+                                              const bson_t *command)
 {
    mongoc_cursor_cursorid_t *cid;
 
    ENTRY;
 
-   cid = (mongoc_cursor_cursorid_t *)cursor->iface_data;
+   cid = (mongoc_cursor_cursorid_t *) cursor->iface_data;
    BSON_ASSERT (cid);
 
    bson_destroy (&cid->array);
@@ -121,7 +120,6 @@ _mongoc_cursor_cursorid_refresh_from_command (mongoc_cursor_t *cursor,
     * to getMore command with {cursor: {id: N, nextBatch: []}}. */
    if (_mongoc_cursor_run_command (cursor, command, &cid->array) &&
        _mongoc_cursor_cursorid_start_batch (cursor)) {
-
       RETURN (true);
    } else {
       if (!cursor->error.domain) {
@@ -139,7 +137,7 @@ _mongoc_cursor_cursorid_refresh_from_command (mongoc_cursor_t *cursor,
 
 static void
 _mongoc_cursor_cursorid_read_from_batch (mongoc_cursor_t *cursor,
-                                         const bson_t   **bson)
+                                         const bson_t **bson)
 {
    mongoc_cursor_cursorid_t *cid;
    const uint8_t *data = NULL;
@@ -147,7 +145,7 @@ _mongoc_cursor_cursorid_read_from_batch (mongoc_cursor_t *cursor,
 
    ENTRY;
 
-   cid = (mongoc_cursor_cursorid_t *)cursor->iface_data;
+   cid = (mongoc_cursor_cursorid_t *) cursor->iface_data;
    BSON_ASSERT (cid);
 
    if (bson_iter_next (&cid->batch_iter) &&
@@ -166,16 +164,20 @@ _mongoc_cursor_cursorid_prime (mongoc_cursor_t *cursor)
 {
    cursor->sent = true;
    cursor->operation_id = ++cursor->client->cluster.operation_id;
-   return _mongoc_cursor_cursorid_refresh_from_command (cursor, &cursor->query);
+   return _mongoc_cursor_cursorid_refresh_from_command (cursor,
+                                                        &cursor->filter);
 }
 
 
 bool
 _mongoc_cursor_prepare_getmore_command (mongoc_cursor_t *cursor,
-                                        bson_t          *command)
+                                        bson_t *command)
 {
    const char *collection;
    int collection_len;
+   int64_t batch_size;
+   bool await_data;
+   int32_t max_await_time_ms;
 
    ENTRY;
 
@@ -185,8 +187,12 @@ _mongoc_cursor_prepare_getmore_command (mongoc_cursor_t *cursor,
    bson_append_int64 (command, "getMore", 7, mongoc_cursor_get_id (cursor));
    bson_append_utf8 (command, "collection", 10, collection, collection_len);
 
-   if (cursor->batch_size) {
-      bson_append_int64 (command, "batchSize", 9, _mongoc_n_return (cursor));
+   batch_size = mongoc_cursor_get_batch_size (cursor);
+
+   /* See find, getMore, and killCursors Spec for batchSize rules */
+   if (batch_size) {
+      bson_append_int64 (
+         command, MONGOC_CURSOR_BATCH_SIZE, MONGOC_CURSOR_BATCH_SIZE_LEN, abs (_mongoc_n_return (cursor)));
    }
 
    /* Find, getMore And killCursors Commands Spec: "In the case of a tailable
@@ -196,10 +202,17 @@ _mongoc_cursor_prepare_getmore_command (mongoc_cursor_t *cursor,
       option maxAwaitTimeMS. If no maxAwaitTimeMS is specified, the driver
       SHOULD not set maxTimeMS on the getMore command."
     */
-   if (cursor->flags & MONGOC_QUERY_TAILABLE_CURSOR &&
-       cursor->flags & MONGOC_QUERY_AWAIT_DATA &&
-       cursor->max_await_time_ms) {
-      bson_append_int32 (command, "maxTimeMS", 9, cursor->max_await_time_ms);
+   await_data = _mongoc_cursor_get_opt_bool (cursor, MONGOC_CURSOR_TAILABLE) &&
+                _mongoc_cursor_get_opt_bool (cursor, MONGOC_CURSOR_AWAIT_DATA);
+
+
+   if (await_data) {
+      max_await_time_ms =
+         (int32_t) mongoc_cursor_get_max_await_time_ms (cursor);
+      if (max_await_time_ms) {
+         bson_append_int32 (
+            command, MONGOC_CURSOR_MAX_TIME_MS, MONGOC_CURSOR_MAX_TIME_MS_LEN, max_await_time_ms);
+      }
    }
 
    RETURN (true);
@@ -216,7 +229,7 @@ _mongoc_cursor_cursorid_get_more (mongoc_cursor_t *cursor)
 
    ENTRY;
 
-   cid = (mongoc_cursor_cursorid_t *)cursor->iface_data;
+   cid = (mongoc_cursor_cursorid_t *) cursor->iface_data;
    BSON_ASSERT (cid);
 
    server_stream = _mongoc_cursor_fetch_stream (cursor);
@@ -225,7 +238,7 @@ _mongoc_cursor_cursorid_get_more (mongoc_cursor_t *cursor)
       RETURN (false);
    }
 
-   if (_use_find_command (cursor, server_stream)) {
+   if (_use_getmore_command (cursor, server_stream)) {
       if (!_mongoc_cursor_prepare_getmore_command (cursor, &command)) {
          mongoc_server_stream_cleanup (server_stream);
          RETURN (false);
@@ -244,8 +257,7 @@ _mongoc_cursor_cursorid_get_more (mongoc_cursor_t *cursor)
 
 
 bool
-_mongoc_cursor_cursorid_next (mongoc_cursor_t *cursor,
-                              const bson_t   **bson)
+_mongoc_cursor_cursorid_next (mongoc_cursor_t *cursor, const bson_t **bson)
 {
    mongoc_cursor_cursorid_t *cid;
    bool refreshed = false;
@@ -254,7 +266,7 @@ _mongoc_cursor_cursorid_next (mongoc_cursor_t *cursor,
 
    *bson = NULL;
 
-   cid = (mongoc_cursor_cursorid_t *)cursor->iface_data;
+   cid = (mongoc_cursor_cursorid_t *) cursor->iface_data;
    BSON_ASSERT (cid);
 
    if (!cursor->sent) {
@@ -314,7 +326,7 @@ _mongoc_cursor_cursorid_clone (const mongoc_cursor_t *cursor)
    ENTRY;
 
    clone_ = _mongoc_cursor_clone (cursor);
-   _mongoc_cursor_cursorid_init (clone_, &cursor->query);
+   _mongoc_cursor_cursorid_init (clone_, &cursor->filter);
 
    RETURN (clone_);
 }
@@ -329,17 +341,17 @@ static mongoc_cursor_interface_t gMongocCursorCursorid = {
 
 
 void
-_mongoc_cursor_cursorid_init (mongoc_cursor_t *cursor,
-                              const bson_t    *command)
+_mongoc_cursor_cursorid_init (mongoc_cursor_t *cursor, const bson_t *command)
 {
    ENTRY;
 
-   bson_destroy (&cursor->query);
-   bson_copy_to (command, &cursor->query);
+   bson_destroy (&cursor->filter);
+   bson_copy_to (command, &cursor->filter);
 
    cursor->iface_data = _mongoc_cursor_cursorid_new ();
 
-   memcpy (&cursor->iface, &gMongocCursorCursorid,
+   memcpy (&cursor->iface,
+           &gMongocCursorCursorid,
            sizeof (mongoc_cursor_interface_t));
 
    EXIT;
@@ -347,19 +359,21 @@ _mongoc_cursor_cursorid_init (mongoc_cursor_t *cursor,
 
 void
 _mongoc_cursor_cursorid_init_with_reply (mongoc_cursor_t *cursor,
-                                         bson_t          *reply,
-                                         uint32_t         server_id)
+                                         bson_t *reply,
+                                         uint32_t server_id)
 {
    mongoc_cursor_cursorid_t *cid;
 
    cursor->sent = true;
    cursor->server_id = server_id;
 
-   cid = (mongoc_cursor_cursorid_t *)cursor->iface_data;
+   cid = (mongoc_cursor_cursorid_t *) cursor->iface_data;
    BSON_ASSERT (cid);
 
    bson_destroy (&cid->array);
-   bson_steal (&cid->array, reply);
+   if (!bson_steal (&cid->array, reply)) {
+      bson_steal (&cid->array, bson_copy (reply));
+   }
 
    if (!_mongoc_cursor_cursorid_start_batch (cursor)) {
       bson_set_error (&cursor->error,

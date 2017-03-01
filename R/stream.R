@@ -7,18 +7,18 @@ mongo_stream_out <- function(data, mongo, pagesize = 1000, verbose = TRUE, ...){
     mongo_collection_insert_page(mongo, mongo_to_json(x, collapse = FALSE, ...))
   }
   out <- jsonlite:::apply_by_pages(data, FUN, pagesize = pagesize, verbose = verbose)
-  list(
+  structure(list(
     nInserted = sum(vapply(out, `[[`, numeric(1), 'nInserted')),
     nMatched = sum(vapply(out, `[[`, numeric(1), 'nMatched')),
     nRemoved = sum(vapply(out, `[[`, numeric(1), 'nRemoved')),
     nUpserted = sum(vapply(out, `[[`, numeric(1), 'nUpserted')),
     writeErrors = do.call(c, lapply(out, `[[`, 'writeErrors'))
-  )
+  ), class = "miniprint")
 }
 
 # Different defaults than jsonlite
 mongo_to_json <- function(x, digits = 9, POSIXt = "mongo", raw = "mongo", always_decimal = TRUE, ...){
-  jsonlite:::asJSON(x, digits = digits, POSIXt = POSIXt, raw = raw, always_decimal = always_decimal, ...)
+  jsonlite:::asJSON(x, digits = digits, POSIXt = POSIXt, raw = raw, always_decimal = always_decimal, no_dots = TRUE, ...)
 }
 
 mongo_stream_in <- function(cur, handler = NULL, pagesize = 1000, verbose = TRUE){

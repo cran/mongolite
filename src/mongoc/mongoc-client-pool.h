@@ -17,8 +17,8 @@
 #ifndef MONGOC_CLIENT_POOL_H
 #define MONGOC_CLIENT_POOL_H
 
-#if !defined (MONGOC_INSIDE) && !defined (MONGOC_COMPILATION)
-# error "Only <mongoc.h> can be included directly."
+#if !defined(MONGOC_INSIDE) && !defined(MONGOC_COMPILATION)
+#error "Only <mongoc.h> can be included directly."
 #endif
 
 #include <bson.h>
@@ -27,7 +27,7 @@
 #include "mongoc-client.h"
 #include "mongoc-config.h"
 #ifdef MONGOC_ENABLE_SSL
-# include "mongoc-ssl.h"
+#include "mongoc-ssl.h"
 #endif
 #include "mongoc-uri.h"
 
@@ -38,29 +38,36 @@ BSON_BEGIN_DECLS
 typedef struct _mongoc_client_pool_t mongoc_client_pool_t;
 
 
-mongoc_client_pool_t *mongoc_client_pool_new               (const mongoc_uri_t     *uri);
-void                  mongoc_client_pool_destroy           (mongoc_client_pool_t   *pool);
-mongoc_client_t      *mongoc_client_pool_pop               (mongoc_client_pool_t   *pool);
-void                  mongoc_client_pool_push              (mongoc_client_pool_t   *pool,
-                                                            mongoc_client_t        *client);
-mongoc_client_t      *mongoc_client_pool_try_pop           (mongoc_client_pool_t   *pool);
-void                  mongoc_client_pool_max_size          (mongoc_client_pool_t   *pool,
-                                                            uint32_t                max_pool_size);
-void                  mongoc_client_pool_min_size          (mongoc_client_pool_t   *pool,
-                                                            uint32_t                min_pool_size);
+BSON_EXPORT (mongoc_client_pool_t *)
+mongoc_client_pool_new (const mongoc_uri_t *uri);
+BSON_EXPORT (void)
+mongoc_client_pool_destroy (mongoc_client_pool_t *pool);
+BSON_EXPORT (mongoc_client_t *)
+mongoc_client_pool_pop (mongoc_client_pool_t *pool);
+BSON_EXPORT (void)
+mongoc_client_pool_push (mongoc_client_pool_t *pool, mongoc_client_t *client);
+BSON_EXPORT (mongoc_client_t *)
+mongoc_client_pool_try_pop (mongoc_client_pool_t *pool);
+BSON_EXPORT (void)
+mongoc_client_pool_max_size (mongoc_client_pool_t *pool,
+                             uint32_t max_pool_size);
+BSON_EXPORT (void)
+mongoc_client_pool_min_size (mongoc_client_pool_t *pool,
+                             uint32_t min_pool_size);
 #ifdef MONGOC_ENABLE_SSL
-void                  mongoc_client_pool_set_ssl_opts      (mongoc_client_pool_t   *pool,
-                                                            const mongoc_ssl_opt_t *opts);
+BSON_EXPORT (void)
+mongoc_client_pool_set_ssl_opts (mongoc_client_pool_t *pool,
+                                 const mongoc_ssl_opt_t *opts);
 #endif
-bool                  mongoc_client_pool_set_apm_callbacks (mongoc_client_pool_t   *pool,
-                                                            mongoc_apm_callbacks_t *callbacks,
-                                                            void                   *context);
-bool                  mongoc_client_pool_set_error_api     (mongoc_client_pool_t   *pool,
-                                                            int32_t                 version);
-#ifdef MONGOC_EXPERIMENTAL_FEATURES
-bool                  mongoc_client_pool_set_appname       (mongoc_client_pool_t   *pool,
-                                                            const char             *appname);
-#endif
+BSON_EXPORT (bool)
+mongoc_client_pool_set_apm_callbacks (mongoc_client_pool_t *pool,
+                                      mongoc_apm_callbacks_t *callbacks,
+                                      void *context);
+BSON_EXPORT (bool)
+mongoc_client_pool_set_error_api (mongoc_client_pool_t *pool, int32_t version);
+BSON_EXPORT (bool)
+mongoc_client_pool_set_appname (mongoc_client_pool_t *pool,
+                                const char *appname);
 BSON_END_DECLS
 
 

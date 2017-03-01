@@ -37,7 +37,7 @@ mongoc_read_concern_new (void)
 {
    mongoc_read_concern_t *read_concern;
 
-   read_concern = (mongoc_read_concern_t *)bson_malloc0 (sizeof *read_concern);
+   read_concern = (mongoc_read_concern_t *) bson_malloc0 (sizeof *read_concern);
 
    return read_concern;
 }
@@ -91,10 +91,12 @@ mongoc_read_concern_get_level (const mongoc_read_concern_t *read_concern)
  * @read_concern: A mongoc_read_concern_t.
  * @level: The read concern level
  *
- * Sets the read concern level. Any string is supported for future compatability
+ * Sets the read concern level. Any string is supported for future compatibility
  * but MongoDB 3.2 only accepts "local" and "majority", aka:
  *  - MONGOC_READ_CONCERN_LEVEL_LOCAL
  *  - MONGOC_READ_CONCERN_LEVEL_MAJORITY
+ * MongoDB 3.4 added
+ *  - MONGOC_READ_CONCERN_LEVEL_LINEARIZABLE
  *
  *  If the @read_concern has already been frozen, calling this function will not
  *  alter the read concern level.
@@ -103,7 +105,7 @@ mongoc_read_concern_get_level (const mongoc_read_concern_t *read_concern)
  */
 bool
 mongoc_read_concern_set_level (mongoc_read_concern_t *read_concern,
-                               const char            *level)
+                               const char *level)
 {
    BSON_ASSERT (read_concern);
 
@@ -115,6 +117,54 @@ mongoc_read_concern_set_level (mongoc_read_concern_t *read_concern,
    read_concern->level = bson_strdup (level);
    return true;
 }
+
+/**
+ * mongoc_read_concern_append:
+ * @read_concern: (in): A mongoc_read_concern_t.
+ * @opts: (out): A pointer to a bson document.
+ *
+ * Appends a read_concern document to command options to send to
+ * a server.
+ *
+ * Returns true on success, false on failure.
+ *
+ */
+bool
+mongoc_read_concern_append (mongoc_read_concern_t *read_concern,
+                            bson_t *command)
+{
+   BSON_ASSERT (read_concern);
+
+   if (!read_concern->level) {
+      return true;
+   }
+
+   if (!bson_append_document (command,
+                              "readConcern",
+                              11,
+                              _mongoc_read_concern_get_bson (read_concern))) {
+      MONGOC_ERROR ("Could not append readConcern to command.");
+      return false;
+   }
+
+   return true;
+}
+
+
+/**
+ * _mongoc_read_concern_is_default:
+ * @read_concern: A const mongoc_read_concern_t.
+ *
+ * This is an internal function.
+ *
+ * Returns true when read_concern has not been modified.
+ */
+bool
+_mongoc_read_concern_is_default (const mongoc_read_concern_t *read_concern)
+{
+   return !read_concern || !read_concern->level;
+}
+
 
 /**
  * mongoc_read_concern_get_bson:
@@ -131,9 +181,10 @@ mongoc_read_concern_set_level (mongoc_read_concern_t *read_concern,
  *    the mongoc_read_concern_t instance.
  */
 const bson_t *
-_mongoc_read_concern_get_bson (mongoc_read_concern_t *read_concern) {
+_mongoc_read_concern_get_bson (mongoc_read_concern_t *read_concern)
+{
    if (!read_concern->frozen) {
-       _mongoc_read_concern_freeze (read_concern);
+      _mongoc_read_concern_freeze (read_concern);
    }
 
    return &read_concern->compiled;
@@ -166,5 +217,3 @@ _mongoc_read_concern_freeze (mongoc_read_concern_t *read_concern)
    BSON_ASSERT (read_concern->level);
    BSON_APPEND_UTF8 (compiled, "level", read_concern->level);
 }
-
-

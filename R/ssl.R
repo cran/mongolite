@@ -1,22 +1,23 @@
-#' SSL options
+#' Connection SSL options
 #'
-#' Set SSL options to connect to the server.
+#' Set SSL options to connect to the MongoDB server.
 #'
 #' @useDynLib mongolite R_default_ssl_options
 #' @export
 #' @param cert path to PEM file with client certificate, or a certificate as
-#' returned by \link[openssl:read_cert]{openssl::read_cert}
+#' returned by [openssl::read_cert()]
 #' @param key path to PEM file with private key from the above certificate, or
-#' a key as returned by \link[openssl:read_key]{openssl::read_key}. This can
+#' a key as returned by [openssl::read_key()]. This can
 #' be the same PEM file as cert.
 #' @param ca a certificate authority PEM file
 #' @param ca_dir directory with CA files
 #' @param crl_file file with revokations
+#' @param allow_invalid_hostname do not verify hostname on server certificate
 #' @param weak_cert_validation disable certificate verification
 ssl_options <- function(cert = NULL, key = cert, ca = NULL, ca_dir = NULL,
-                        crl_file = NULL, weak_cert_validation = NULL){
+    crl_file = NULL, allow_invalid_hostname = NULL, weak_cert_validation = NULL){
   opts <- .Call(R_default_ssl_options)
-  names(opts) <- c("pem_file", "ca_file", "ca_dir", "crl_file", "weak_cert_validation")
+  names(opts) <- c("pem_file", "ca_file", "ca_dir", "crl_file", "allow_invalid_hostname", "weak_cert_validation")
   if(length(cert)){
     key <- openssl::read_key(key)
     cert <- openssl::read_cert(cert)
@@ -34,7 +35,9 @@ ssl_options <- function(cert = NULL, key = cert, ca = NULL, ca_dir = NULL,
     opts$ca_dir = normalizePath(ca_dir, mustWork = TRUE)
   if(length(crl_file))
     opts$crl_file = normalizePath(crl_file, mustWork = TRUE)
+  if(length(allow_invalid_hostname))
+    opts$allow_invalid_hostname = allow_invalid_hostname
   if(length(weak_cert_validation))
     opts$weak_cert_validation = weak_cert_validation
-  return(opts)
+  structure(as.list(opts), class = "miniprint")
 }

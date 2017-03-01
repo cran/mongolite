@@ -1,10 +1,21 @@
 #include <mongolite.h>
 
+//globals
+static int bigint_as_char = 0;
+
 SEXP ConvertArray(bson_iter_t* iter, bson_iter_t* counter);
 SEXP ConvertObject(bson_iter_t* iter, bson_iter_t* counter);
 SEXP ConvertValue(bson_iter_t* iter);
 SEXP ConvertBinary(bson_iter_t* iter);
 SEXP ConvertDate(bson_iter_t* iter);
+SEXP ConvertDec128(bson_iter_t* iter);
+SEXP ConvertTimestamp(bson_iter_t* iter);
+
+SEXP R_bigint_as_char(SEXP x){
+  if(Rf_isLogical(x))
+    bigint_as_char = asLogical(x);
+  return ScalarLogical(bigint_as_char);
+}
 
 SEXP R_json_to_bson(SEXP json){
   bson_t *b;
@@ -42,7 +53,8 @@ SEXP R_bson_to_list(SEXP ptr) {
 
 SEXP ConvertValue(bson_iter_t* iter){
   if(BSON_ITER_HOLDS_INT32(iter)){
-    return ScalarInteger(bson_iter_int32(iter));
+    int res = bson_iter_int32(iter);
+    return res == NA_INTEGER ? ScalarReal(res) : ScalarInteger(res);
   } else if(BSON_ITER_HOLDS_NULL(iter)){
     return R_NilValue;
   } else if(BSON_ITER_HOLDS_BOOL(iter)){
@@ -50,7 +62,13 @@ SEXP ConvertValue(bson_iter_t* iter){
   } else if(BSON_ITER_HOLDS_DOUBLE(iter)){
     return ScalarReal(bson_iter_double(iter));
   } else if(BSON_ITER_HOLDS_INT64(iter)){
-    return ScalarReal((double) bson_iter_int64(iter));
+    if(bigint_as_char){
+      char buf[32];
+      snprintf(buf, 32, "%lld", bson_iter_int64(iter));
+      return mkString(buf);
+    } else {
+      return ScalarReal((double) bson_iter_int64(iter));
+    }
   } else if(BSON_ITER_HOLDS_UTF8(iter)){
     return mkStringUTF8(bson_iter_utf8(iter, NULL));
   } else if(BSON_ITER_HOLDS_CODE(iter)){
@@ -59,6 +77,10 @@ SEXP ConvertValue(bson_iter_t* iter){
     return ConvertBinary(iter);
   } else if(BSON_ITER_HOLDS_DATE_TIME(iter)){
     return ConvertDate(iter);
+  } else if(BSON_ITER_HOLDS_DECIMAL128(iter)){
+    return ConvertDec128(iter);
+  } else if(BSON_ITER_HOLDS_TIMESTAMP(iter)){
+    return ConvertTimestamp(iter);
   } else if(BSON_ITER_HOLDS_OID(iter)){
     const bson_oid_t *val = bson_iter_oid(iter);
     char str[25];
@@ -81,12 +103,46 @@ SEXP ConvertValue(bson_iter_t* iter){
   }
 }
 
+SEXP ConvertTimestamp(bson_iter_t* iter){
+  uint32_t timestamp;
+  uint32_t increment;
+  bson_iter_timestamp(iter, &timestamp, &increment);
+  SEXP res = PROTECT(allocVector(VECSXP, 2));
+  SET_VECTOR_ELT(res, 0, ScalarInteger(timestamp));
+  SET_VECTOR_ELT(res, 1, ScalarInteger(increment));
+  SEXP names = PROTECT(allocVector(STRSXP, 2));
+  SET_STRING_ELT(names, 0, Rf_mkChar("t"));
+  SET_STRING_ELT(names, 1, Rf_mkChar("i"));
+  setAttrib(res, R_NamesSymbol, names);
+  UNPROTECT(2);
+  return res;
+}
+/*
 SEXP ConvertDate(bson_iter_t* iter){
   SEXP list = PROTECT(allocVector(VECSXP, 1));
   SET_VECTOR_ELT(list, 0, ScalarReal((double) bson_iter_date_time(iter)));
   setAttrib(list, R_NamesSymbol, mkString("$date"));
   UNPROTECT(1);
   return list;
+}
+*/
+
+SEXP ConvertDate(bson_iter_t* iter){
+  SEXP classes = PROTECT(allocVector(STRSXP, 2));
+  SET_STRING_ELT(classes, 0, mkChar("POSIXct"));
+  SET_STRING_ELT(classes, 1, mkChar("POSIXt"));
+  SEXP out = PROTECT(ScalarReal(bson_iter_date_time(iter) / 1000));
+  setAttrib(out, R_ClassSymbol, classes);
+  UNPROTECT(2);
+  return out;
+}
+
+SEXP ConvertDec128(bson_iter_t* iter){
+  bson_decimal128_t decimal128;
+  bson_iter_decimal128(iter, &decimal128);
+  char string[BSON_DECIMAL128_STRING];
+  bson_decimal128_to_string (&decimal128, string);
+  return ScalarReal(strtod(string, NULL));
 }
 
 SEXP ConvertBinary(bson_iter_t* iter){
@@ -100,7 +156,7 @@ SEXP ConvertBinary(bson_iter_t* iter){
   for (int i = 0; i < binary_len; i++) {
     RAW(out)[i] = binary[i];
   }
-  setAttrib(out, install("subtype"), ScalarInteger(subtype));
+  setAttrib(out, install("type"), ScalarRaw(subtype));
   UNPROTECT(1);
   return out;
 

@@ -18,7 +18,7 @@
 #include "mongoc-config.h"
 #include "mongoc-error.h"
 #include "mongoc-read-prefs-private.h"
-#include "mongoc-trace.h"
+#include "mongoc-trace-private.h"
 
 
 mongoc_read_prefs_t *
@@ -26,10 +26,10 @@ mongoc_read_prefs_new (mongoc_read_mode_t mode)
 {
    mongoc_read_prefs_t *read_prefs;
 
-   read_prefs = (mongoc_read_prefs_t *)bson_malloc0(sizeof *read_prefs);
+   read_prefs = (mongoc_read_prefs_t *) bson_malloc0 (sizeof *read_prefs);
    read_prefs->mode = mode;
-   bson_init(&read_prefs->tags);
-   read_prefs->max_staleness_ms = 0;  /* no maximum staleness */
+   bson_init (&read_prefs->tags);
+   read_prefs->max_staleness_seconds = MONGOC_NO_MAX_STALENESS;
 
    return read_prefs;
 }
@@ -44,7 +44,7 @@ mongoc_read_prefs_get_mode (const mongoc_read_prefs_t *read_prefs)
 
 void
 mongoc_read_prefs_set_mode (mongoc_read_prefs_t *read_prefs,
-                            mongoc_read_mode_t   mode)
+                            mongoc_read_mode_t mode)
 {
    BSON_ASSERT (read_prefs);
    BSON_ASSERT (mode <= MONGOC_READ_NEAREST);
@@ -62,24 +62,22 @@ mongoc_read_prefs_get_tags (const mongoc_read_prefs_t *read_prefs)
 
 
 void
-mongoc_read_prefs_set_tags (mongoc_read_prefs_t *read_prefs,
-                            const bson_t        *tags)
+mongoc_read_prefs_set_tags (mongoc_read_prefs_t *read_prefs, const bson_t *tags)
 {
    BSON_ASSERT (read_prefs);
 
-   bson_destroy(&read_prefs->tags);
+   bson_destroy (&read_prefs->tags);
 
    if (tags) {
-      bson_copy_to(tags, &read_prefs->tags);
+      bson_copy_to (tags, &read_prefs->tags);
    } else {
-      bson_init(&read_prefs->tags);
+      bson_init (&read_prefs->tags);
    }
 }
 
 
 void
-mongoc_read_prefs_add_tag (mongoc_read_prefs_t *read_prefs,
-                           const bson_t        *tag)
+mongoc_read_prefs_add_tag (mongoc_read_prefs_t *read_prefs, const bson_t *tag)
 {
    bson_t empty = BSON_INITIALIZER;
    char str[16];
@@ -98,25 +96,24 @@ mongoc_read_prefs_add_tag (mongoc_read_prefs_t *read_prefs,
 }
 
 
-#ifdef MONGOC_EXPERIMENTAL_FEATURES
-int32_t
-mongoc_read_prefs_get_max_staleness_ms (const mongoc_read_prefs_t *read_prefs)
+int64_t
+mongoc_read_prefs_get_max_staleness_seconds (
+   const mongoc_read_prefs_t *read_prefs)
 {
    BSON_ASSERT (read_prefs);
 
-   return read_prefs->max_staleness_ms;
+   return read_prefs->max_staleness_seconds;
 }
 
 
 void
-mongoc_read_prefs_set_max_staleness_ms (mongoc_read_prefs_t *read_prefs,
-                                        int32_t              max_staleness_ms)
+mongoc_read_prefs_set_max_staleness_seconds (mongoc_read_prefs_t *read_prefs,
+                                             int64_t max_staleness_seconds)
 {
    BSON_ASSERT (read_prefs);
 
-   read_prefs->max_staleness_ms = max_staleness_ms;
+   read_prefs->max_staleness_seconds = max_staleness_seconds;
 }
-#endif
 
 
 bool
@@ -125,15 +122,17 @@ mongoc_read_prefs_is_valid (const mongoc_read_prefs_t *read_prefs)
    BSON_ASSERT (read_prefs);
 
    /*
-    * Tags or maxStalenessMS are not supported with PRIMARY mode.
+    * Tags or maxStalenessSeconds are not supported with PRIMARY mode.
     */
    if (read_prefs->mode == MONGOC_READ_PRIMARY) {
-      if (!bson_empty(&read_prefs->tags) || read_prefs->max_staleness_ms > 0) {
+      if (!bson_empty (&read_prefs->tags) ||
+          read_prefs->max_staleness_seconds != MONGOC_NO_MAX_STALENESS) {
          return false;
       }
    }
 
-   if (read_prefs->max_staleness_ms < 0) {
+   if (read_prefs->max_staleness_seconds != MONGOC_NO_MAX_STALENESS &&
+       read_prefs->max_staleness_seconds <= 0) {
       return false;
    }
 
@@ -145,8 +144,8 @@ void
 mongoc_read_prefs_destroy (mongoc_read_prefs_t *read_prefs)
 {
    if (read_prefs) {
-      bson_destroy(&read_prefs->tags);
-      bson_free(read_prefs);
+      bson_destroy (&read_prefs->tags);
+      bson_free (read_prefs);
    }
 }
 
@@ -157,17 +156,17 @@ mongoc_read_prefs_copy (const mongoc_read_prefs_t *read_prefs)
    mongoc_read_prefs_t *ret = NULL;
 
    if (read_prefs) {
-      ret = mongoc_read_prefs_new(read_prefs->mode);
-      bson_copy_to(&read_prefs->tags, &ret->tags);
-      ret->max_staleness_ms = read_prefs->max_staleness_ms;
+      ret = mongoc_read_prefs_new (read_prefs->mode);
+      bson_copy_to (&read_prefs->tags, &ret->tags);
+      ret->max_staleness_seconds = read_prefs->max_staleness_seconds;
    }
 
    return ret;
 }
 
 
-static const char *
-_get_read_mode_string (mongoc_read_mode_t mode)
+const char *
+_mongoc_read_mode_as_str (mongoc_read_mode_t mode)
 {
    switch (mode) {
    case MONGOC_READ_PRIMARY:
@@ -190,17 +189,16 @@ _get_read_mode_string (mongoc_read_mode_t mode)
  * The driver must have discovered the server is a mongos.
  */
 static void
-_apply_read_preferences_mongos (const mongoc_read_prefs_t *read_prefs,
-                                const bson_t *query_bson,
-                                mongoc_apply_read_prefs_result_t *result /* OUT */)
+_apply_read_preferences_mongos (
+   const mongoc_read_prefs_t *read_prefs,
+   const bson_t *query_bson,
+   mongoc_apply_read_prefs_result_t *result /* OUT */)
 {
    mongoc_read_mode_t mode;
    const bson_t *tags = NULL;
    bson_t child;
    const char *mode_str;
-#ifdef MONGOC_EXPERIMENTAL_FEATURES
-   int64_t max_staleness_ms;
-#endif
+   int64_t max_staleness_seconds;
 
    mode = mongoc_read_prefs_get_mode (read_prefs);
    if (read_prefs) {
@@ -244,24 +242,25 @@ _apply_read_preferences_mongos (const mongoc_read_prefs_t *read_prefs,
       if (bson_has_field (query_bson, "$query")) {
          bson_concat (result->query_with_read_prefs, query_bson);
       } else {
-         bson_append_document (result->query_with_read_prefs,
-                               "$query", 6, query_bson);
+         bson_append_document (
+            result->query_with_read_prefs, "$query", 6, query_bson);
       }
 
-      bson_append_document_begin (result->query_with_read_prefs,
-                                  "$readPreference", 15, &child);
-      mode_str = _get_read_mode_string (mode);
+      bson_append_document_begin (
+         result->query_with_read_prefs, "$readPreference", 15, &child);
+      mode_str = _mongoc_read_mode_as_str (mode);
       bson_append_utf8 (&child, "mode", 4, mode_str, -1);
       if (!bson_empty0 (tags)) {
          bson_append_array (&child, "tags", 4, tags);
       }
 
-#ifdef MONGOC_EXPERIMENTAL_FEATURES
-      max_staleness_ms = mongoc_read_prefs_get_max_staleness_ms (read_prefs);
-      if (max_staleness_ms > 0) {
-         bson_append_int64 (&child, "maxStalenessMS", 14, max_staleness_ms);
+      max_staleness_seconds =
+         mongoc_read_prefs_get_max_staleness_seconds (read_prefs);
+
+      if (max_staleness_seconds != MONGOC_NO_MAX_STALENESS) {
+         bson_append_int64 (
+            &child, "maxStalenessSeconds", 19, max_staleness_seconds);
       }
-#endif
 
       bson_append_document_end (result->query_with_read_prefs, &child);
    }
@@ -362,11 +361,12 @@ apply_read_prefs_result_cleanup (mongoc_apply_read_prefs_result_t *result)
 }
 
 bool
-_mongoc_read_prefs_validate (const mongoc_read_prefs_t *read_prefs, 
-                             bson_error_t              *error)
+_mongoc_read_prefs_validate (const mongoc_read_prefs_t *read_prefs,
+                             bson_error_t *error)
 {
    if (read_prefs && !mongoc_read_prefs_is_valid (read_prefs)) {
-      bson_set_error (error, MONGOC_ERROR_COMMAND, 
+      bson_set_error (error,
+                      MONGOC_ERROR_COMMAND,
                       MONGOC_ERROR_COMMAND_INVALID_ARG,
                       "Invalid mongoc_read_prefs_t");
       return false;

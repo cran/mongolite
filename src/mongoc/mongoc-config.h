@@ -18,6 +18,9 @@
 #ifndef MONGOC_CONFIG_H
 #define MONGOC_CONFIG_H
 
+/* R packages should be portable */
+#define MONGOC_USER_SET_CFLAGS ""
+#define MONGOC_USER_SET_LDFLAGS ""
 
 /*
  * MONGOC_ENABLE_SSL_SECURE_CHANNEL is set from configure to determine if we are
@@ -127,6 +130,18 @@
 #  undef MONGOC_ENABLE_SASL
 #endif
 
+/*
+ * MONGOC_ENABLE_SASL_CYRUS is set from configure to determine if we are
+ * compiled with Cyrus SASL support.
+ */
+#ifdef _WIN32
+#ifndef CRYPT_STRING_NOCRLF
+#define CRYPT_STRING_NOCRLF 0x40000000
+#endif
+#define MONGOC_ENABLE_SASL_SSPI 1
+#else
+#define MONGOC_ENABLE_SASL_CYRUS 1
+#endif
 
 /*
  * MONGOC_HAVE_WEAK_SYMBOLS is set from configure to determine if the
@@ -150,6 +165,18 @@
 #if MONGOC_NO_AUTOMATIC_GLOBALS != 1
 #  undef MONGOC_NO_AUTOMATIC_GLOBALS
 #endif
+
+
+/*
+ * MONGOC_HAVE_SOCKLEN is set from configure to determine if we
+ * need to emulate the type.
+ */
+#define MONGOC_HAVE_SOCKLEN 1
+
+#if MONGOC_HAVE_SOCKLEN != 1
+#  undef MONGOC_HAVE_SOCKLEN
+#endif
+
 
 /*
  * Define to support experimental future mongoc features

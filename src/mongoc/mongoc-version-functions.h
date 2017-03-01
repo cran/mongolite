@@ -15,7 +15,7 @@
  */
 
 
-#if !defined (MONGOC_INSIDE) && !defined (MONGOC_COMPILATION)
+#if !defined(MONGOC_INSIDE) && !defined(MONGOC_COMPILATION)
 #error "Only <mongoc.h> can be included directly."
 #endif
 
@@ -23,14 +23,19 @@
 #ifndef MONGOC_VERSION_FUNCTIONS_H
 #define MONGOC_VERSION_FUNCTIONS_H
 
-#include "bson.h"  /* for "bool" */
+#include "bson.h" /* for "bool" */
 
-int mongoc_get_major_version (void);
-int mongoc_get_minor_version (void);
-int mongoc_get_micro_version (void);
-const char *mongoc_get_version (void);
-bool mongoc_check_version (int required_major,
-                           int required_minor,
-                           int required_micro);
+BSON_EXPORT (int)
+mongoc_get_major_version (void);
+BSON_EXPORT (int)
+mongoc_get_minor_version (void);
+BSON_EXPORT (int)
+mongoc_get_micro_version (void);
+BSON_EXPORT (const char *)
+mongoc_get_version (void);
+BSON_EXPORT (bool)
+mongoc_check_version (int required_major,
+                      int required_minor,
+                      int required_micro);
 
 #endif /* MONGOC_VERSION_FUNCTIONS_H */
