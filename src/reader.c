@@ -8,7 +8,8 @@ void bson_reader_finalize(void *handle){
 ssize_t bson_reader_feed(void *handle, void *buf, size_t count){
   int err;
   SEXP *con = (SEXP*) handle;
-  SEXP call = PROTECT(LCONS(install("readBin"), LCONS(*con, LCONS(mkString("raw"), LCONS(ScalarInteger(count), R_NilValue)))));
+  SEXP call = PROTECT(LCONS(PROTECT(install("readBin")),
+    PROTECT(LCONS(*con, LCONS(mkString("raw"), LCONS(ScalarInteger(count), R_NilValue))))));
   SEXP res = PROTECT(R_tryEval(call, R_GlobalEnv, &err));
 
   // check if readBin succeeded
@@ -37,7 +38,8 @@ SEXP R_mongo_restore(SEXP con, SEXP ptr_col, SEXP verb) {
   bson_t reply;
 
   while(!done) {
-    bulk = mongoc_collection_create_bulk_operation (col, true, NULL);
+    //note: default opts uses {ordered:true}
+    bulk = mongoc_collection_create_bulk_operation_with_opts(col, NULL);
     for(i = 0; i < 1000; i++){
       if(!(b = bson_reader_read (reader, &done)))
         break;

@@ -1,7 +1,15 @@
+1.3
+ - Update mongo-c-driver to upstream 1.9.0
+ - Switch from uptream deprecated APIs to new ones
+ - Add 'filter' parameter to mongo$update() for arrayFilters
+ - Expose 'stop_on_error' parameter in mongo$insert()
+ - Updated mongo$update() to new APIs and return summary reply
+ - Workaround #pragma lines in vendored mongo-c-driver for CRAN
+
 1.2
  - Update mongo-c-driver to upstream 1.6.2
  - Update jsonlite requirement to 1.4 (fixes bug in reading dates)
- - Add 'date_as_char' paramter to mongo_options()
+ - Add 'date_as_char' parameter to mongo_options()
 
 1.1
  - Update mongo-c-driver to upstream 1.6.1
