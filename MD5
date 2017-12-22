@@ -1,6 +1,6 @@
-23ca3af76a3b7a57cc316e2b84511e61 *DESCRIPTION
+844cacb99a2dfd5f5ba7c2cf668d7ac6 *DESCRIPTION
 d982b93a952d8c4e4548b5641f0e0b86 *NAMESPACE
-4687f2b54a8667554e6ec20dcde00e07 *NEWS
+8ded572e617b937692e9af96b243ffd1 *NEWS
 a0b4f1d0f8c1edbd91b36155797213e7 *R/bson.R
 e5c3b262a68e377ed07b47dd8874c2dd *R/client.R
 e7d900f834a8414d824b5c65ed2d5bcf *R/hex.R
@@ -110,7 +110,7 @@ e3525b6193720c353e169ae57d7d09dd *src/mongoc/mongoc-client-private.h
 6b7b8729aada78dd70501ba2ffd6dda7 *src/mongoc/mongoc-client-session-private.h
 582f76234bf790b160386b936e7301ee *src/mongoc/mongoc-client-session.c
 507ecc13b4b765831f8d0cd808beaa4c *src/mongoc/mongoc-client-session.h
-7eca0f3d13eacccadd049054d2556324 *src/mongoc/mongoc-client.c
+c219f56bcb2f06812509ca42ca5214b3 *src/mongoc/mongoc-client.c
 71a318d4cf8fd9ee0f6ff30976c9a679 *src/mongoc/mongoc-client.h
 0f7266845534239e1ca200943e20b203 *src/mongoc/mongoc-cluster-cyrus-private.h
 ad7f5316b39288ac93d7fc6b53e89388 *src/mongoc/mongoc-cluster-cyrus.c
@@ -121,9 +121,9 @@ ca236c4b650901b82abdf1692702e566 *src/mongoc/mongoc-cluster-sasl-private.h
 14da691f7bd13c067d424245ee9280da *src/mongoc/mongoc-cluster-sasl.c
 8b425eab41ba9ce67e9de23201a08794 *src/mongoc/mongoc-cluster-sspi-private.h
 5cc55741170453ae77f875f4a00b1756 *src/mongoc/mongoc-cluster-sspi.c
-b4e00ba9c661f9959d9ee0b306d3619d *src/mongoc/mongoc-cluster.c
+2c59f4845a2890070f9c77cb07753525 *src/mongoc/mongoc-cluster.c
 ae18a2de7700829274f440d3881f5d0e *src/mongoc/mongoc-cmd-private.h
-ddafbe7e6b2caf907e45f02a8a7cc244 *src/mongoc/mongoc-cmd.c
+9cecd3511badb8f48e0a3d2bc4520402 *src/mongoc/mongoc-cmd.c
 c65e1b8be72426169d1485bafe62ef67 *src/mongoc/mongoc-collection-private.h
 53ad91f98dfd4d35e117ac4ddea0cfd5 *src/mongoc/mongoc-collection.c
 d6dd8c32d0da3935704c95923fa2308e *src/mongoc/mongoc-collection.h
@@ -281,10 +281,10 @@ ceeb38c5d0125ba0ed559e2557f27770 *src/mongoc/mongoc-thread-private.h
 47916a0ed8d74b0c27022797e2ae9fbb *src/mongoc/mongoc-topology-description-private.h
 055769efd1067edb544788720e590fbb *src/mongoc/mongoc-topology-description.c
 53ba27e26803bb1705b05fd44d19d8b7 *src/mongoc/mongoc-topology-description.h
-343de9572a90d1b4ea1f17a06f2f099f *src/mongoc/mongoc-topology-private.h
+1594c9800ae9477b71640844a0e71284 *src/mongoc/mongoc-topology-private.h
 1d05f380ea283c0240bcdb123a8728dc *src/mongoc/mongoc-topology-scanner-private.h
 e0a488fb6e83c0c8ed84a988cbaec9b9 *src/mongoc/mongoc-topology-scanner.c
-d245e5921e8060c51e62c1bf57673bad *src/mongoc/mongoc-topology.c
+1a44627a5f53d51c8ae070a97c5fb430 *src/mongoc/mongoc-topology.c
 9070611a08226982864902ecf668d098 *src/mongoc/mongoc-trace-private.h
 3654be761daea9a8c30580003f575ef9 *src/mongoc/mongoc-uri-private.h
 c2318a9c8cf79be4cadb95de8c1a7947 *src/mongoc/mongoc-uri.c
@@ -315,7 +315,7 @@ dd22bb15cb70d35fe25192f0f304871b *src/mongoc/op-reply.def
 03c6179a4fe8b51c606b03a763529d55 *src/mongoc/op-update.def
 28abcc30025e7d451b99261aa88f218f *src/mongoc/utlist.h
 1fd13c329ad7fc0b1d277be0e01e4735 *src/mongolite.h
-61b20eba7cff9f8cfb86bcde71d15a9e *src/reader.c
+6c2df0f7c94e7da3a1ae3fc340854d43 *src/reader.c
 a2829d91193a759b6a1801f908c7a8f8 *src/tests/has_sasl_client_done.c
 d29c02e9ba33e992867d36f4c888078d *src/utils.c
 4c376f33d7dc8b813443f17415d808c9 *src/win32/ipv6.c
