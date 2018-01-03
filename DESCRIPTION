@@ -5,7 +5,7 @@ Description: High-performance 'MongoDB' client based on 'libmongoc' and 'jsonlit
     Includes support for aggregation, indexing, map-reduce, streaming, encryption,
     enterprise authentication. The online user manual provides an overview of the 
     available methods in the package: <https://jeroen.github.io/mongolite/>.
-Version: 1.4
+Version: 1.5
 Authors@R: c(
     person("Jeroen", "Ooms", ,"jeroen@berkeley.edu", role = c("aut", "cre")),
     person("MongoDB, Inc", role = "cph", comment = "Bundled mongo-c-driver, see AUTHORS file")
@@ -21,9 +21,9 @@ RoxygenNote: 6.0.1.9000
 Suggests: spelling
 Language: en-GB
 NeedsCompilation: yes
-Packaged: 2017-12-21 15:30:51 UTC; jeroen
+Packaged: 2018-01-02 10:51:01 UTC; jeroen
 Author: Jeroen Ooms [aut, cre],
   MongoDB, Inc [cph] (Bundled mongo-c-driver, see AUTHORS file)
 Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
 Repository: CRAN
-Date/Publication: 2017-12-22 14:04:28 UTC
+Date/Publication: 2018-01-03 10:34:59 UTC

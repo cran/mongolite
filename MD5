@@ -1,12 +1,12 @@
-844cacb99a2dfd5f5ba7c2cf668d7ac6 *DESCRIPTION
+93fdc664ffe2d1851e2bc684e2caf757 *DESCRIPTION
 d982b93a952d8c4e4548b5641f0e0b86 *NAMESPACE
-8ded572e617b937692e9af96b243ffd1 *NEWS
-a0b4f1d0f8c1edbd91b36155797213e7 *R/bson.R
-e5c3b262a68e377ed07b47dd8874c2dd *R/client.R
+008effd42747efdba97fdd85dbce6c25 *NEWS
+b69a3183817752dd6d7d71cc7368a879 *R/bson.R
+25bda00396035079712bfe0d0ac66fba *R/client.R
 e7d900f834a8414d824b5c65ed2d5bcf *R/hex.R
 3c68436e9a64e318c069bc4523a88eb9 *R/iter.R
 565aff626d268e260f3afe3e2ccb44a2 *R/jeroen.R
-4679d414669ff0bdb1af232262d9a997 *R/mongo.R
+245ef180e41e5a9b5757d3ca6a3dc9f7 *R/mongo.R
 ed6202c1e957f89417485a1b0d5edb4e *R/options.R
 0d70cc6c5218f84e9d1b6d50e8cd6b1c *R/ssl.R
 666a3fb65e1f2ab35d605f50f1189fd9 *R/stream.R
@@ -16,7 +16,7 @@ d41d8cd98f00b204e9800998ecf8427e *configure.win
 d2614b89fda835bc3e9b49296909872f *inst/AUTHORS
 318038c4cd41fc01ff091b8c5111ea50 *inst/CITATION
 6f58102f4c10d1d56925b6cc8d5a28da *inst/WORDLIST
-0f0927f1314df1722e265a52800e8a81 *man/mongo.Rd
+a5204427320a05a0c3fb8e7dd3a8513d *man/mongo.Rd
 87da7f3897ed3d37da07afd58976bd9a *man/mongo_options.Rd
 6a27ec1e0800d4c130994cf241fdb25f *man/ssl_options.Rd
 965b90de05d98ccb7c94a791483290e5 *src/Makevars.in
@@ -78,7 +78,7 @@ ad34cf6fe3c6f7ec508501b7a16b8555 *src/bson/bson-writer.h
 fe99d7148748772118e353440c742d5a *src/bson/bson.c
 1faa57e8eae6663c9afc8282ffdf353a *src/bson/bson.h
 fdbbe9e031386967266a7e9f4eaa002e *src/client.c
-be7a899b3ec19370c9cc21726491a2dd *src/collection.c
+418ee29ba156ec2a6892dbe8a6eb76bc *src/collection.c
 b78f3775851e0d738fb92293d942ef2d *src/cursor.c
 dce8491ac6cd3b62dad40e1faaf97585 *src/hex.c
 913a26899a259e2365a8d7dce81fae36 *src/jsonsl/jsonsl.c
