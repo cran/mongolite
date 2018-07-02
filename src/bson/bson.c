@@ -1574,7 +1574,7 @@ bson_append_regex (bson_t *bson,
 
    r =  _bson_append (bson,
                       5,
-                      (1 + key_length + 1 + regex_len + options_sorted->len),
+                      (1 + key_length + 1 + regex_len + options_sorted->len + 1),
                       1,
                       &type,
                       key_length,
@@ -2589,7 +2589,7 @@ _bson_as_json_visit_double (const bson_iter_t *iter,
       }
    } else {
       start_len = str->len;
-      bson_string_append_printf (str, "%.20g", v_double);
+      bson_string_append_printf (str, "%.15g", v_double);
 
       /* ensure trailing ".0" to distinguish "3" from "3.0" */
       if (strspn (&str->str[start_len], "0123456789-") ==
