@@ -27,9 +27,8 @@ mongo_client_new <- function(uri = "mongodb://127.0.0.1", pem_file = NULL, pem_p
   .Call(R_mongo_client_new, uri, pem_file, pem_pwd, ca_file, ca_dir, crl_file, allow_invalid_hostname, weak_cert_validation)
 }
 
-#' @useDynLib mongolite R_mongo_client_server_status
-mongo_client_server_status <- function(client){
-  .Call(R_mongo_client_server_status, client)
+mongo_client_server_status <- function(col){
+  mongo_collection_command_simple(col, '{"serverStatus" : 1}')
 }
 
 #' @useDynLib mongolite R_mongo_collection_drop
@@ -37,10 +36,9 @@ mongo_collection_drop <- function(col){
   .Call(R_mongo_collection_drop, col)
 }
 
-# This is identical to m$execute('{"collStats":"cmdtest"}')
-#' @useDynLib mongolite R_mongo_collection_stats
 mongo_collection_stats <- function(col){
-  .Call(R_mongo_collection_stats, col)
+  name <- mongo_collection_name(col)
+  mongo_collection_command_simple(col, sprintf('{"collStats": "%s"}', name))
 }
 
 #' @useDynLib mongolite R_mongo_collection_name
@@ -56,22 +54,26 @@ mongo_collection_rename <- function(col, db = NULL, name){
 }
 
 #' @useDynLib mongolite R_mongo_collection_count
-mongo_collection_count <- function(col, query = "{}", no_timeout = FALSE){
-  stopifnot(is.logical(no_timeout))
-  .Call(R_mongo_collection_count, col, bson_or_json(query), no_timeout)
+mongo_collection_count <- function(col, query = "{}"){
+  .Call(R_mongo_collection_count, col, bson_or_json(query))
 }
 
+#returns data
 #' @useDynLib mongolite R_mongo_collection_command_simple
-mongo_collection_command_simple <- function(col, command = "{}", no_timeout = FALSE){
-  #returns data
-  stopifnot(is.logical(no_timeout))
-  .Call(R_mongo_collection_command_simple, col, bson_or_json(command), no_timeout)
+mongo_collection_command_simple <- function(col, command = "{}", simplify = FALSE){
+  data <- .Call(R_mongo_collection_command_simple, col, bson_or_json(command))
+  if(isTRUE(simplify)){
+    jsonlite:::simplify(data)
+  } else {
+    data
+  }
 }
 
+#returns cursor
 #' @useDynLib mongolite R_mongo_collection_command
-mongo_collection_command <- function(col, command = "{}"){
-  #returns cursor
-  .Call(R_mongo_collection_command, col, bson_or_json(command))
+mongo_collection_command <- function(col, command = "{}", no_timeout = FALSE){
+  stopifnot(is.logical(no_timeout))
+  .Call(R_mongo_collection_command, col, bson_or_json(command), no_timeout)
 }
 
 # Wrapper for mapReduce command
@@ -205,4 +207,16 @@ mongo_restore <- function(col, con, verbose = FALSE){
     on.exit(close(con))
   }
   .Call(R_mongo_restore, con, col, verbose)
+}
+
+#' @useDynLib mongolite R_ptr_get_prot
+ptr_get_prot <- function(col){
+  stopifnot(inherits(col, "mongo_collection"))
+  .Call(R_ptr_get_prot, col)
+}
+
+#' @useDynLib mongolite R_mongo_collection_disconnect
+mongo_collection_disconnect <- function(col){
+  stopifnot(inherits(col, "mongo_collection"))
+  .Call(R_mongo_collection_disconnect, col)
 }

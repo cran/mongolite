@@ -45,7 +45,7 @@
 
 #define MONGOC_STREAM_TLS_OPENSSL_BUFFER_SIZE 4096
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL)
 static void
 BIO_meth_free (BIO_METHOD *meth)
 {
@@ -692,7 +692,7 @@ mongoc_stream_tls_openssl_new (mongoc_stream_t *base_stream,
 #endif
 
    if (!client) {
-      /* Only usd by the Mock Server.
+      /* Only used by the Mock Server.
        * Set a callback to get the SNI, if provided */
       SSL_CTX_set_tlsext_servername_callback (ssl_ctx,
                                               _mongoc_stream_tls_openssl_sni);

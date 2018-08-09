@@ -19,6 +19,7 @@
 #define MONGOC_CONFIG_H
 
 /* R packages should be portable */
+#define MONGOC_CC ""
 #define MONGOC_USER_SET_CFLAGS ""
 #define MONGOC_USER_SET_LDFLAGS ""
 
@@ -125,7 +126,7 @@
  */
 #ifdef MONGOC_ENABLE_SSL_OPENSSL
 #include <openssl/opensslv.h>
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100001L
+#if (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100001L) || (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x2070000fL)
 #define MONGOC_HAVE_ASN1_STRING_GET0_DATA 1
 #endif
 #endif
@@ -161,19 +162,6 @@
 
 #if MONGOC_ENABLE_SASL_GSSAPI != 1
 #  undef MONGOC_ENABLE_SASL_GSSAPI
-#endif
-
-
-/*
- * MONGOC_HAVE_WEAK_SYMBOLS is set from configure to determine if the
- * compiler supports the (weak) annotation. We use it to prevent
- * Link-Time-Optimization (LTO) in our constant-time mongoc_memcmp()
- * This is known to work with GNU GCC and Solaris Studio
- */
-#define MONGOC_HAVE_WEAK_SYMBOLS 1
-
-#if MONGOC_HAVE_WEAK_SYMBOLS != 1
-#  undef MONGOC_HAVE_WEAK_SYMBOLS
 #endif
 
 
@@ -219,7 +207,7 @@
  * res_nsearch().
  */
 
-#if !defined (__FreeBSD__) && !defined (__OpenBSD__)
+#if !defined (__FreeBSD__) && !defined (__OpenBSD__) && !defined(_WIN32)
 #define MONGOC_HAVE_RES_SEARCH 1
 #endif
 

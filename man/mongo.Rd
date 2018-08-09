@@ -26,17 +26,23 @@ The collection can be interfaced using the methods described below.
 }
 \description{
 Connect to a MongoDB collection. Returns a \link{mongo} connection object with
-methods listed below. The \href{https://jeroen.github.io/mongolite/}{mongolite user manual}
-is the best place to get started.
+methods listed below. Connections automatically get pooled between collection
+and gridfs objects to the same database.
+}
+\details{
+This manual page is deliberately minimal, see the
+\href{https://jeroen.github.io/mongolite/}{mongolite user manual} for more details
+and worked examples.
 }
 \section{Methods}{
 
 \describe{
-\item{\code{aggregate(pipeline = '{}', handler = NULL, pagesize = 1000)}}{Execute a pipeline using the Mongo aggregation framework.}
+\item{\code{aggregate(pipeline = '{}', handler = NULL, pagesize = 1000, iterate = FALSE)}}{Execute a pipeline using the Mongo aggregation framework. Set \code{iterate = TRUE} to return an iterator instead of data frame.}
 \item{\code{count(query = '{}')}}{Count the number of records matching a given \code{query}. Default counts all records in collection.}
+\item{\code{disconnect(gc = TRUE)}}{Disconnect collection. The \emph{connection} gets disconnected once the client is not used by collections in the pool.}
 \item{\code{distinct(key, query = '{}')}}{List unique values of a field given a particular query.}
 \item{\code{drop()}}{Delete entire collection with all data and metadata.}
-\item{\code{export(con = stdout(), bson = FALSE)}}{Streams all data from collection to a \code{\link{connection}} in \href{http://ndjson.org}{jsonlines} format (similar to \href{http://docs.mongodb.org/v2.6/reference/mongoexport/}{mongoexport}). Alternatively when \code{bson = TRUE} it outputs the binary \href{http://bsonspec.org/faq.html}{bson} format (similar to \href{http://docs.mongodb.org/manual/reference/program/mongodump/}{mongodump}).}
+\item{\code{export(con = stdout(), bson = FALSE, query = '{}', fields = '{}', sort = '{"_id":1}')}}{Streams all data from collection to a \code{\link{connection}} in \href{http://ndjson.org}{jsonlines} format (similar to \href{http://docs.mongodb.org/v2.6/reference/mongoexport/}{mongoexport}). Alternatively when \code{bson = TRUE} it outputs the binary \href{http://bsonspec.org/faq.html}{bson} format (similar to \href{http://docs.mongodb.org/manual/reference/program/mongodump/}{mongodump}).}
 \item{\code{find(query = '{}', fields = '{"_id" : 0}', sort = '{}', skip = 0, limit = 0, handler = NULL, pagesize = 1000)}}{Retrieve \code{fields} from records matching \code{query}. Default \code{handler} will return all data as a single dataframe.}
 \item{\code{import(con, bson = FALSE)}}{Stream import data in \href{http://ndjson.org}{jsonlines} format from a \code{\link{connection}}, similar to the \href{http://docs.mongodb.org/v2.6/reference/mongoimport/}{mongoimport} utility. Alternatively when \code{bson = TRUE} it assumes the binary \href{http://bsonspec.org/faq.html}{bson} format (similar to \href{http://docs.mongodb.org/manual/reference/program/mongorestore/}{mongorestore}).}
 \item{\code{index(add = NULL, remove = NULL)}}{List, add, or remove indexes from the collection. The \code{add} and \code{remove} arguments can either be a field name or json object. Returns a dataframe with current indexes.}
@@ -44,17 +50,17 @@ is the best place to get started.
 \item{\code{insert(data, pagesize = 1000, stop_on_error = TRUE, ...)}}{Insert rows into the collection. Argument 'data' must be a data-frame, named list (for single record) or character vector with json strings (one string for each row). For lists and data frames, arguments in \code{...} get passed to \code{\link[jsonlite:toJSON]{jsonlite::toJSON}}}
 \item{\code{iterate(query = '{}', fields = '{"_id":0}', sort = '{}', skip = 0, limit = 0)}}{Runs query and returns iterator to read single records one-by-one.}
 \item{\code{mapreduce(map, reduce, query = '{}', sort = '{}', limit = 0, out = NULL, scope = NULL)}}{Performs a map reduce query. The \code{map} and \code{reduce} arguments are strings containing a JavaScript function. Set \code{out} to a string to store results in a collection instead of returning.}
-\item{\code{remove(query = "{}", multiple = FALSE)}}{Remove record(s) matching \code{query} from the collection.}
+\item{\code{remove(query = "{}", just_one = FALSE)}}{Remove record(s) matching \code{query} from the collection.}
 \item{\code{rename(name, db = NULL)}}{Change the name or database of a collection. Changing name is cheap, changing database is expensive.}
-\item{\code{run(comand = '{"ping: 1}')}}{Change the name or database of a collection. Changing name is cheap, changing database is expensive.}
 \item{\code{replace(query, update = '{}', upsert = FALSE)}}{Replace matching record(s) with value of the \code{update} argument.}
+\item{\code{run(command = '{"ping": 1}', simplify = TRUE)}}{Run a raw mongodb command on the database. If the command returns data, output is simplified by default, but this can be disabled.}
 \item{\code{update(query, update = '{"$set":{}}', upsert = FALSE, multiple = FALSE)}}{Modify fields of matching record(s) with value of the \code{update} argument.}
 }
 }
 
 \examples{
-# Connect to mongolabs
-con <- mongo("mtcars", url = "mongodb://readwrite:test@ds043942.mongolab.com:43942/jeroen_test")
+# Connect to demo server
+con <- mongo("mtcars", url = "mongodb://readwrite:test@mongo.opencpu.org:43942/jeroen_test")
 if(con$count() > 0) con$drop()
 con$insert(mtcars)
 stopifnot(con$count() == nrow(mtcars))
@@ -68,7 +74,7 @@ con$drop()
 rm(con)
 gc()
 
-\dontrun{
+\donttest{
 # dplyr example
 library(nycflights13)
 
