@@ -21,7 +21,6 @@
 #' @export
 #' @param prefix string to prefix the collection name
 #' @examples # New GridFS
-#' \donttest{
 #' fs <- gridfs(url = "mongodb+srv://readwrite:test@cluster0-84vdt.mongodb.net/test")
 #' download.file('https://cloud.r-project.org/doc/manuals/r-devel/NEWS.pdf', 'NEWS.pdf', mode = 'wb')
 #' fs$upload('NEWS.pdf')
@@ -35,6 +34,7 @@
 #' unlink(files)
 #' stopifnot(length(unique(hashes)) == 1)
 #'
+#' \donttest{
 #' # Insert Binary Data
 #' fs <- gridfs()
 #' buf <- serialize(nycflights13::flights, NULL)
