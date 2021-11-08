@@ -23,6 +23,14 @@ SEXP R_mongo_client_new(SEXP uri_string, SEXP pem_file, SEXP pem_pwd, SEXP ca_fi
   if (!uri)
     Rf_error("failed to parse URI: %s (%s)", uri_string, err.message);
 
+  /* openssl is too old on Solaris, skip cert validation */
+  #if defined(__sun)
+    mongoc_uri_set_option_as_bool (uri, MONGOC_URI_TLSINSECURE, true);
+  #endif
+
+  /* The ocsp client causes a threading hang on some systems, disabling for now */
+  mongoc_uri_set_option_as_bool (uri, MONGOC_URI_TLSDISABLEOCSPENDPOINTCHECK, true);
+
   mongoc_client_t *client = mongoc_client_new_from_uri (uri);
   if(!client)
     stop("Invalid uri_string. Try mongodb://localhost");
@@ -49,7 +57,9 @@ SEXP R_mongo_client_new(SEXP uri_string, SEXP pem_file, SEXP pem_pwd, SEXP ca_fi
     mongoc_client_set_ssl_opts(client, &opt);
   }
 
-  mongoc_client_set_appname (client, "r/mongolite");
+  if (NULL == mongoc_uri_get_appname (uri)) {
+    mongoc_client_set_appname (client, "r/mongolite");
+  }
 
 #endif
 
