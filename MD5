@@ -1,6 +1,6 @@
-78b19571a75bd8d871854af678d5723c *DESCRIPTION
+6b2676d8c5b7ef5c70b71a7df6cb7bee *DESCRIPTION
 2e253f5cfe5a0a3a177f8374aaa4325f *NAMESPACE
-bfd477dac762c930f51b4692733f7fdf *NEWS
+9cb227f89c510710cf951ec667dc07fa *NEWS
 b69a3183817752dd6d7d71cc7368a879 *R/bson.R
 2e09b4775bad1c45f937f4833239fe8a *R/client.R
 7c2220d54770ee09b0d0d36cd32553ba *R/gridfs.R
@@ -79,7 +79,7 @@ f23b07d93c8c65df5c0142f8ede21612 *src/bson/bson-utf8.h
 05d85f6ccc42974bc14cf0eab289ebce *src/bson/bson-writer.h
 42ab62f44421b55736ca0e26e656ae9c *src/bson/bson.c
 30bce06980f59cd0b2785119a75fe3cf *src/bson/bson.h
-e5e4abefbce54d4ce328a548a94acb6d *src/client.c
+8152a18d4aff752142147758f234efb4 *src/client.c
 609ed71203a0b767c0e51ae7597ffc75 *src/collection.c
 d36f9ceb3ac1fc1c5a9e5add685cf12a *src/common/common-b64-private.h
 66f9014b39f05a20a26d288d51ab5485 *src/common/common-b64.c

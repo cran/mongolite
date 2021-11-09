@@ -9,8 +9,13 @@ SEXP R_default_ssl_options(){
   SET_VECTOR_ELT(out, 1, safe_string(opt->ca_file));
   SET_VECTOR_ELT(out, 2, safe_string(opt->ca_dir));
   SET_VECTOR_ELT(out, 3, safe_string(opt->crl_file));
-  SET_VECTOR_ELT(out, 4, Rf_ScalarLogical(opt->weak_cert_validation));
+#if defined(__sun)
+  SET_VECTOR_ELT(out, 4, Rf_ScalarLogical(1));
+  SET_VECTOR_ELT(out, 5, Rf_ScalarLogical(1));
+#else
+  SET_VECTOR_ELT(out, 4, Rf_ScalarLogical(opt->allow_invalid_hostname));
   SET_VECTOR_ELT(out, 5, Rf_ScalarLogical(opt->weak_cert_validation));
+#endif
   UNPROTECT(1);
   return out;
 }
@@ -24,12 +29,18 @@ SEXP R_mongo_client_new(SEXP uri_string, SEXP pem_file, SEXP pem_pwd, SEXP ca_fi
     Rf_error("failed to parse URI: %s (%s)", uri_string, err.message);
 
   /* openssl is too old on Solaris, skip cert validation */
-  #if defined(__sun)
+#if defined(__sun)
+  if(mongoc_uri_get_tls(uri)){
     mongoc_uri_set_option_as_bool (uri, MONGOC_URI_TLSINSECURE, true);
-  #endif
+  }
+#endif
 
-  /* The ocsp client causes a threading hang on some systems, disabling for now */
-  mongoc_uri_set_option_as_bool (uri, MONGOC_URI_TLSDISABLEOCSPENDPOINTCHECK, true);
+    /* The ocsp client causes a threading hang on some systems, disabling for now */
+#ifdef MONGOC_ENABLE_SSL_OPENSSL
+  if(mongoc_uri_get_tls(uri)){
+    mongoc_uri_set_option_as_bool (uri, MONGOC_URI_TLSDISABLEOCSPENDPOINTCHECK, true);
+  }
+#endif
 
   mongoc_client_t *client = mongoc_client_new_from_uri (uri);
   if(!client)
