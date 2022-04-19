@@ -1,6 +1,6 @@
-3af2432b1ed2dea35f698e648e2e045e *DESCRIPTION
+60b3f95fc2f3305c8a414d35d34181ab *DESCRIPTION
 2e253f5cfe5a0a3a177f8374aaa4325f *NAMESPACE
-8a13716bffd0d0ec738daa51d6333174 *NEWS
+ac911fedf5d9a695b8761727afb57182 *NEWS
 b69a3183817752dd6d7d71cc7368a879 *R/bson.R
 2e09b4775bad1c45f937f4833239fe8a *R/client.R
 7c2220d54770ee09b0d0d36cd32553ba *R/gridfs.R
@@ -18,6 +18,7 @@ d41d8cd98f00b204e9800998ecf8427e *configure.win
 d2614b89fda835bc3e9b49296909872f *inst/AUTHORS
 1466568e2931ddcdb7791494921de3cd *inst/CITATION
 cdc4baee466ff835a9a92338f04a09f1 *inst/WORDLIST
+b899fb48810b9a90e6d382da9fe6ab38 *man/figures/logo.png
 fa541c2f18f11f82dbf9360f9dfefab2 *man/gridfs.Rd
 cb8344fb1c98112135e737b40e59806e *man/mongo.Rd
 4f239971e50d592d3038d8138933f97d *man/mongo_options.Rd
@@ -179,7 +180,7 @@ e2a1834c201488ad8d5d16992dc58ae0 *src/mongoc/mongoc-cmd.c
 2cea9224f2c11ca0048d3faf871f3e43 *src/mongoc/mongoc-collection.h
 51a5f2b055faf65386ed28d537af94e2 *src/mongoc/mongoc-compression-private.h
 c8efb75e7a6278b654502ad1f16b5e50 *src/mongoc/mongoc-compression.c
-6ef3203c0e2bbe83b72d1c91d2494ed8 *src/mongoc/mongoc-config.h
+4b1c2dbf8aa4ffd196dbcc254c624bde *src/mongoc/mongoc-config.h
 83b01f3ae0287022e4c5b4dbe0512904 *src/mongoc/mongoc-counters-private.h
 0e75630e4d381fba80801afc10811173 *src/mongoc/mongoc-counters.c
 04d57743da7337aaec4dfe958a5742b7 *src/mongoc/mongoc-counters.defs
