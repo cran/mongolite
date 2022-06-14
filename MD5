@@ -1,6 +1,6 @@
-60b3f95fc2f3305c8a414d35d34181ab *DESCRIPTION
+6f309823160ead504f528df749c71e9f *DESCRIPTION
 2e253f5cfe5a0a3a177f8374aaa4325f *NAMESPACE
-ac911fedf5d9a695b8761727afb57182 *NEWS
+be4c8596c6805ef00d25619b3d60bcee *NEWS
 b69a3183817752dd6d7d71cc7368a879 *R/bson.R
 2e09b4775bad1c45f937f4833239fe8a *R/client.R
 7c2220d54770ee09b0d0d36cd32553ba *R/gridfs.R
@@ -24,7 +24,7 @@ cb8344fb1c98112135e737b40e59806e *man/mongo.Rd
 4f239971e50d592d3038d8138933f97d *man/mongo_options.Rd
 68f2178af6584658b4e7039de402e5ee *man/oid_to_timestamp.Rd
 b26ffeddcd6eff5951ec6fce6b84422c *man/ssl_options.Rd
-6657f9c7aafc8b76350f4d77017c6905 *src/Makevars.in
+0833be8cae5372e666be00335f12f98d *src/Makevars.in
 9ed34871dd320423276487bac4209833 *src/Makevars.win
 349ef6e23864fdc216ee111a6486e6d0 *src/bson.c
 889d90340a7b3210d087b2a2f02699cf *src/bson/bcon.c
