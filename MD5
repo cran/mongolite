@@ -1,6 +1,6 @@
-d951c189282b647b9612407fd5097d16 *DESCRIPTION
+77df03591f2b0d771a4c28e2a77f1c04 *DESCRIPTION
 2e253f5cfe5a0a3a177f8374aaa4325f *NAMESPACE
-3400a17d7ea27d0af5ece8a9c33ba045 *NEWS
+b49d83d5d1d16651e0e93c5caac5b902 *NEWS
 b69a3183817752dd6d7d71cc7368a879 *R/bson.R
 2e09b4775bad1c45f937f4833239fe8a *R/client.R
 7c2220d54770ee09b0d0d36cd32553ba *R/gridfs.R
@@ -56,7 +56,7 @@ e1973fc044b52bfc2bb35b440350d228 *src/bson/bson-keys.h
 d637fd5939d26a883f8a1dd2a55c4db0 *src/bson/bson-macros.h
 ee97c0e463270be3c97207a3555c7fb4 *src/bson/bson-md5.c
 64bfaad7b9c371ac3cc5b19ae0d88fb5 *src/bson/bson-md5.h
-5009428e2f62b328735118568f71379b *src/bson/bson-memory.c
+7143a7c1640af54e8d860c6d454aea05 *src/bson/bson-memory.c
 bd1060bd64476ebf607005ba6da351c4 *src/bson/bson-memory.h
 8301daa3ba4306b2a89af70c619aa209 *src/bson/bson-oid.c
 2e25ec392f12cf4afd970fff2bedacd4 *src/bson/bson-oid.h
@@ -181,7 +181,7 @@ abc87a40623b01a2848a13483f55c0eb *src/mongoc/mongoc-cluster-cyrus-private.h
 2cea9224f2c11ca0048d3faf871f3e43 *src/mongoc/mongoc-collection.h
 51a5f2b055faf65386ed28d537af94e2 *src/mongoc/mongoc-compression-private.h
 c8efb75e7a6278b654502ad1f16b5e50 *src/mongoc/mongoc-compression.c
-4b1c2dbf8aa4ffd196dbcc254c624bde *src/mongoc/mongoc-config.h
+a386bd7a3e14ddd4a7ee1f899922184f *src/mongoc/mongoc-config.h
 90b2e289c641c63088241afdab51c9fe *src/mongoc/mongoc-counters-private.h
 0e75630e4d381fba80801afc10811173 *src/mongoc/mongoc-counters.c
 04d57743da7337aaec4dfe958a5742b7 *src/mongoc/mongoc-counters.defs
