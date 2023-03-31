@@ -1,6 +1,6 @@
-77df03591f2b0d771a4c28e2a77f1c04 *DESCRIPTION
+e9a11791baac20cfd7d8e1ac0b1a2071 *DESCRIPTION
 2e253f5cfe5a0a3a177f8374aaa4325f *NAMESPACE
-b49d83d5d1d16651e0e93c5caac5b902 *NEWS
+7e572e72d12b65f009e4f963c1f2ddea *NEWS
 b69a3183817752dd6d7d71cc7368a879 *R/bson.R
 2e09b4775bad1c45f937f4833239fe8a *R/client.R
 7c2220d54770ee09b0d0d36cd32553ba *R/gridfs.R
@@ -9,14 +9,14 @@ b69a3183817752dd6d7d71cc7368a879 *R/bson.R
 565aff626d268e260f3afe3e2ccb44a2 *R/jeroen.R
 bdcffa13ffc64a9bc8a7127e5b7f2466 *R/mongo.R
 ed6202c1e957f89417485a1b0d5edb4e *R/options.R
-21abfe9cf2162634390aa83512c40510 *R/pool.R
+9633a81903cb15c6ece21444d22767ba *R/pool.R
 8ca76276de24d3008156716e949a6663 *R/ssl.R
 b802e9a5113fb61a56772ec80c33af7e *R/stream.R
 4ce1fcf8d4a4b68aac58e1c00c2db6d0 *cleanup
 d3a67821a382a72121674d3560b94f54 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 d2614b89fda835bc3e9b49296909872f *inst/AUTHORS
-1466568e2931ddcdb7791494921de3cd *inst/CITATION
+a90dd9fcff36b5cba44c9e843b378d46 *inst/CITATION
 cdc4baee466ff835a9a92338f04a09f1 *inst/WORDLIST
 b899fb48810b9a90e6d382da9fe6ab38 *man/figures/logo.png
 fa541c2f18f11f82dbf9360f9dfefab2 *man/gridfs.Rd
@@ -101,7 +101,7 @@ cc4d69576f4fe9b87cd116d399309454 *src/jsonsl/jsonsl.h
 e8a52f0b2bc3e28f7c64f0a777ce3770 *src/kms/kms_b64.c
 9cb501a5bfed23a74f5e38be89c1a6d5 *src/kms/kms_caller_identity_request.c
 13e302bdf7e407648cfec94530869271 *src/kms/kms_crypto.h
-f4c1b39c72e5f25c7660bd86d87ca85e *src/kms/kms_crypto_apple.c
+8a0c24c91179c479131af7fc841c8bdf *src/kms/kms_crypto_apple.c
 31da91380166d7218a7d499aef7105ed *src/kms/kms_crypto_libcrypto.c
 74b56cf66ea6e9cff053efb192a29add *src/kms/kms_crypto_none.c
 37f833a2d0dbb40323de0ddbacd461d6 *src/kms/kms_crypto_windows.c
