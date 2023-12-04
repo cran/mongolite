@@ -5,7 +5,7 @@ Description: High-performance MongoDB client based on 'mongo-c-driver' and 'json
     Includes support for aggregation, indexing, map-reduce, streaming, encryption,
     enterprise authentication, and GridFS. The online user manual provides an overview 
     of the available methods in the package: <https://jeroen.github.io/mongolite/>.
-Version: 2.7.2
+Version: 2.7.3
 Authors@R: c(
     person("Jeroen", "Ooms", ,"jeroen@berkeley.edu", role = c("aut", "cre"),
       comment = c(ORCID = "0000-0002-4035-0289")),
@@ -18,14 +18,14 @@ URL: https://github.com/jeroen/mongolite/ (devel)
         http://mongoc.org/ (upstream)
 BugReports: https://github.com/jeroen/mongolite/issues
 SystemRequirements: OpenSSL, Cyrus SASL (aka libsasl2)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Suggests: spelling, nycflights13, ggplot2
 Language: en-GB
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2023-03-30 15:15:38 UTC; jeroen
+Packaged: 2023-12-04 18:34:49 UTC; jeroen
 Author: Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>),
   MongoDB, Inc [cph] (Bundled mongo-c-driver, see AUTHORS file)
 Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
 Repository: CRAN
-Date/Publication: 2023-03-31 09:30:02 UTC
+Date/Publication: 2023-12-04 19:10:05 UTC
