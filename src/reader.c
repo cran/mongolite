@@ -71,3 +71,46 @@ SEXP R_mongo_restore(SEXP con, SEXP ptr_col, SEXP verb) {
   mongoc_bulk_operation_destroy (bulk);
   return Rf_ScalarInteger(count);
 }
+
+SEXP R_bson_reader_file(SEXP path, SEXP as_json, SEXP verbose){
+  bson_error_t err = {0};
+  bson_reader_t *reader = bson_reader_new_from_file(CHAR(STRING_ELT(path, 0)), &err);
+  if(!reader)
+    Rf_error("Error opening file: %s", err.message);
+  bool json_output = Rf_asLogical(as_json);
+  bool progress = Rf_asLogical(verbose);
+  bool reached_eof = 0;
+  size_t len = 0;
+  while(1){
+    const bson_t *doc = bson_reader_read (reader, &reached_eof);
+    if(reached_eof)
+      break;
+    if(doc == NULL)
+      Rf_error("Failed to read all documents");
+    len++;
+  }
+  bson_reader_destroy(reader);
+  reader = bson_reader_new_from_file(CHAR(STRING_ELT(path, 0)), &err);
+  reached_eof = 0;
+  SEXP out = PROTECT(Rf_allocVector(json_output ? STRSXP: VECSXP, len));
+  for(size_t i = 0; i < len; i++){
+    const bson_t *doc = bson_reader_read (reader, &reached_eof);
+    if(reached_eof || doc == NULL)
+      Rf_error("Failed to read all documents");
+    if(json_output){
+      size_t jsonlength = 0;
+      char *str = bson_as_relaxed_extended_json(doc, &jsonlength);
+      SET_STRING_ELT(out, i, Rf_mkCharLenCE(str, jsonlength, CE_UTF8));
+      bson_free(str);
+    } else {
+      SET_VECTOR_ELT(out, i, bson2list(doc));
+    }
+    if(progress && (i % 50 == 0))
+      REprintf("\rReading %zd of %zd...", i, len);
+  }
+  if(progress)
+    REprintf("\rDone reading %zd documents\n", len);
+  bson_reader_destroy(reader);
+  UNPROTECT(1);
+  return out;
+}
