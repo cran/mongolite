@@ -1,6 +1,6 @@
-e8bd4ce24c640258b58cb7e86a575e37 *DESCRIPTION
+f525b0fd5bec8f618490879bacc83e69 *DESCRIPTION
 854840a48cd78ed1e7b06965b9946dd2 *NAMESPACE
-118ccc046db420a2496883f227c4546a *NEWS
+6124fb36dad0f088b87f4b33f6c85344 *NEWS
 b69a3183817752dd6d7d71cc7368a879 *R/bson.R
 2e09b4775bad1c45f937f4833239fe8a *R/client.R
 7c2220d54770ee09b0d0d36cd32553ba *R/gridfs.R
@@ -14,7 +14,7 @@ ed6202c1e957f89417485a1b0d5edb4e *R/options.R
 8ca76276de24d3008156716e949a6663 *R/ssl.R
 8d47740f0576fb8d755bdbe9934cda37 *R/stream.R
 4ce1fcf8d4a4b68aac58e1c00c2db6d0 *cleanup
-af3375b3eed69635f492d5f5949240da *configure
+b6782eb3adf14390fa3593b1496067d6 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 d2614b89fda835bc3e9b49296909872f *inst/AUTHORS
 a90dd9fcff36b5cba44c9e843b378d46 *inst/CITATION
@@ -58,7 +58,7 @@ d244a008321b301066cccfc219ab23b6 *src/bson/bson-keys.h
 db4fd93681e9d4d5fc75bee0f78825d2 *src/bson/bson-macros.h
 f7a14e73d9ba1c865216de6a836c14b0 *src/bson/bson-md5.c
 9eeb0d4aad2e51f99450fd954cc44bfe *src/bson/bson-md5.h
-308f968cb70bc2327940742731b026a8 *src/bson/bson-memory.c
+5064dc15c0ae5accfc9c54c185c98bbf *src/bson/bson-memory.c
 30e7a234f657ead5b690d63e66d55711 *src/bson/bson-memory.h
 83e48d4ef4fd9c41ac326dc5d3651679 *src/bson/bson-oid.c
 249c62aee2ffd2c5edb454be6b5cd7a6 *src/bson/bson-oid.h
