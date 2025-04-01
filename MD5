@@ -1,6 +1,6 @@
-83dc9a6a6e28b51298dda556e550dac2 *DESCRIPTION
+53f8890bbf1fdf0ae1e00acfb9fb3e36 *DESCRIPTION
 854840a48cd78ed1e7b06965b9946dd2 *NAMESPACE
-614915464efb76cdf62623a2ee7c30f7 *NEWS
+7069f1d0b2a6e48ff318dcafa6812385 *NEWS
 b69a3183817752dd6d7d71cc7368a879 *R/bson.R
 2e09b4775bad1c45f937f4833239fe8a *R/client.R
 7c2220d54770ee09b0d0d36cd32553ba *R/gridfs.R
@@ -26,8 +26,8 @@ d933ca0b3fc45976110530058c02010c *man/gridfs.Rd
 68f2178af6584658b4e7039de402e5ee *man/oid_to_timestamp.Rd
 454b52dc8c2988f29bfa7f88a757d281 *man/read_bson.Rd
 b26ffeddcd6eff5951ec6fce6b84422c *man/ssl_options.Rd
-dc72f90548bffd2ffe4f06a421faa50a *src/Makevars.in
-963b1a7bbd93e35a1b129f52e033fd6d *src/Makevars.win
+1c35027aedff850c1b53a6b340ee8679 *src/Makevars.in
+97e4f80b5a21afa2e4faf8cdd250e7e4 *src/Makevars.win
 1bc5bc8969cfcf9916b36ef916ada185 *src/bson.c
 2e991c298adbb696c584f5f85149b864 *src/bson/bcon.c
 94538a79b0dc528b560d844e34f19947 *src/bson/bcon.h
@@ -325,7 +325,7 @@ a77663e1782f5bd6e3bf4d29a2c170c1 *src/mongoc/mongoc-memcmp-private.h
 ed2992d365f66d81a4bba53f3f73af9a *src/mongoc/mongoc-opcode.c
 45a2f202aa9b11452d4e115eab61f90d *src/mongoc/mongoc-opcode.h
 8e1b605c7b51e7e019e53253a7afeeaf *src/mongoc/mongoc-openssl-private.h
-970800ffb57764ceaad4ff242d357224 *src/mongoc/mongoc-openssl.c
+9e6720c53e8f86ccbf2cb382539a81a3 *src/mongoc/mongoc-openssl.c
 40ebdddec3ed127f671e52209b0e978c *src/mongoc/mongoc-optional.c
 20b1cba35bfcb135952b28e5ce44d1a5 *src/mongoc/mongoc-optional.h
 97c22a13f88a19204f358ce69fdc928d *src/mongoc/mongoc-opts-helpers-private.h
@@ -450,7 +450,7 @@ f9d93f1ef72269fca5efc4e8e34ff6d1 *src/mongoc/service-gcp.c
 f97452a858a2f22a168016bd68c05178 *src/mongoc/uthash.h
 bdfaf1366fff5f890f7f83e3be58551f *src/mongoc/utlist.h
 5afb1aa397af3939196d7d78b0b85620 *src/mongolite.h
-9a0f4b842681349701857691011fc479 *src/osx/Makevars
+c501d488328ae73824472711376996ae *src/osx/Makevars
 530aaee363c0502ebcea66a47350bed8 *src/reader.c
 552ffde0ca8dfa0026881ca1e80283c2 *src/tests/dependencies.c
 a2829d91193a759b6a1801f908c7a8f8 *src/tests/has_sasl_client_done.c
@@ -464,3 +464,4 @@ bc882e5235bfdccc9e49f99290365b40 *tests/spelling.R
 16b63fc9452a46bb9ef24f0486091ff1 *tests/testthat/test-bson.R
 0add4cc6eb55febd79d255f370c4dbb9 *tests/testthat/test-diamonds.R
 a08a44776b1cef0dcf12687f06fd67fd *tests/testthat/test-flights.R
+dec83e005a4420d899b1cf349f4e6448 *tools/winlibs.R
