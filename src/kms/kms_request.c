@@ -32,12 +32,12 @@ parse_query_params (kms_request_str_t *q)
    kms_request_str_t *k, *v;
 
    do {
-      equals = strchr ((const char *) p, '=');
+      equals = strchr (p, '=');
       if (!equals) {
          kms_kv_list_destroy (lst);
          return NULL;
       }
-      amp = strchr ((const char *) equals, '&');
+      amp = strchr (equals, '&');
       if (!amp) {
          amp = end;
       }
@@ -744,7 +744,7 @@ done:
    return kms_request_str_detach (sig);
 }
 
-void
+static void
 kms_request_validate (kms_request_t *request)
 {
    if (!check_and_prohibit_kmip (request)) {
